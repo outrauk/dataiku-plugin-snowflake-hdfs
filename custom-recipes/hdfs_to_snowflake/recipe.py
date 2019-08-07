@@ -67,7 +67,7 @@ logger.info(f'SF Stage Location: {sf_location}')
 columns = [f'$1:"{col["name"]}"' for col in hdfs_input.read_schema()]
 
 # "TYPE = ?" could come from in_config['formatType']}, theoretically
-sql = f"""COPY INTO sql_table_name
+sql = f"""COPY INTO {sql_table_name}
 FROM (
 SELECT {', '.join(columns)}
 FROM '{sf_location}'
