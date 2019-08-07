@@ -2,8 +2,8 @@
 {
     // Meta data for display purposes
     "meta" : {
-        "label" : "Sync Snowflake to HDFS",
-        "description" : "Syncs a Snowflake data source to HDF",
+        "label" : "Sync HDFS to Snowflake",
+        "description" : "Syncs an HDFS data source to a Snowflake table",
         "icon" : "icon-puzzle-piece"
     },
 
@@ -19,26 +19,26 @@
 
     "inputRoles" : [
         {
-            "name": "sf_input",
-            "label": "Snowflake Input",
+            "name": "hdfs_input",
+            "label": "HDFS Input",
+            "description": "HDFS parquet dataset",
+            "arity": "UNARY",
+            "required": true,
+            "acceptsDataset": true,
+            "mustBeStrictlyType": "HDFS"
+        }
+    ],
+
+    "outputRoles" : [
+        {
+            "name": "sf_output",
+            "label": "Snowflake Output",
             "description": "Snowflake table",
             "arity": "UNARY",
             "required": true,
             "acceptsDataset": true,
             "mustBeSQL": true,
             "mustBeStrictlyType": "Snowflake"
-        }
-    ],
-
-    "outputRoles" : [
-        {
-            "name": "hdfs_output",
-            "label": "HDFS Output",
-            "description": "HDFS parquet dataset",
-            "arity": "UNARY",
-            "required": true,
-            "acceptsDataset": true,
-            "mustBeStrictlyType": "HDFS"
         }
     ],
 
