@@ -53,8 +53,8 @@
             "name": "snowflake_stage",
             "label" : "Snowflake Stage",
             "type": "STRING",
-            "description":"The name of a Snowflake stage that points to the output's connection",
-            "mandatory" : true
+            "description":"The name of a Snowflake stage that points to the output's HDFS managed path. Uses plugin's default if not specified.",
+            "mandatory" : false
         }
         // The 'COLUMNS' type works in the same way, except that it is a list of strings.
     ],
