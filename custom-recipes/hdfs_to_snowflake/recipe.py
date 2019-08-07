@@ -77,6 +77,7 @@ FROM '{sf_location}'
 FILE_FORMAT = (TYPE = PARQUET, SNAPPY_COMPRESSION = TRUE)
 PATTERN = '{sf_file_pattern}'
 FORCE = TRUE;
+COMMIT;
 """
 
 logger.info(f'SF Query: {sql}')
