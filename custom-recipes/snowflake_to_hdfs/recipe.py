@@ -31,7 +31,7 @@ hdfs_output = dataiku.Dataset(get_output_names_for_role('hdfs_output')[0])
 hdfs_output_config = hdfs_output.get_config()
 # TODO: check input and output types. Check that input is Snowflake and that it's a table and not a query
 # check that the output is HDFS and Parquet
-
+# TODO: check that it's actually Parquet and Snappy
 
 sf_stage_name = get_recipe_config()['snowflake_stage']
 
