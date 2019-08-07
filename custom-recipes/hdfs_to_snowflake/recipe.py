@@ -41,18 +41,19 @@ sql_table_name = f'"{sf_input_config["params"]["schema"]}"."{sf_input_config["pa
 logger.info(f'SF Table: {sql_table_name}')
 
 # create output dataframe of zero rows
-hdfs_output_df = sf_input.get_dataframe().head(n=0)
+sf_output_df = hdfs_input.get_dataframe().head(n=0)
 
 # write HDFS
-hdfs_output.write_with_schema(hdfs_output_df)
+sf_output.write_with_schema(sf_output_df)
 
 
-path = hdfs_output_config['params']['path']
+path = hdfs_input_config['params']['path']
 proj_key = dataiku.get_custom_variables()['projectKey']
 path = path.replace('${projectKey}', proj_key)
 
 # @PUBLIC.OUTRA_DATA_DATAIKU_EMR_MANAGED_STAGE
-sf_location = f'{sf_stage_name}{path}/part'
+# using "part_" gives file that were output by SF. "part-" is what gets output by DSS 
+sf_location = f'{sf_stage_name}{path}/part*.snappy.parquet'
 
 
 logger.info(f'SF Stage Location: {sf_location}')
@@ -62,18 +63,24 @@ logger.info(f'SF Stage Location: {sf_location}')
 # 2) run the COPY INTO
 # TODO: get stage name from a parameter or something...
 
-# "TYPE = ?" could come from {out_config['formatType']}, theoretically
-sql = f"""COPY INTO '{sf_location}'
-FROM {sql_table_name}
-FILE_FORMAT = (TYPE = PARQUET)
-OVERWRITE = TRUE
-HEADER = TRUE;
+
+columns = [f'$1:"{col["name"]}"' for col in hdfs_input.read_schema()]
+
+# "TYPE = ?" could come from in_config['formatType']}, theoretically
+sql = f"""COPY INTO sql_table_name
+FROM (
+SELECT {', '.join(columns)}
+FROM '{sf_location}'
+)
+FILE_FORMAT = (TYPE = PARQUET, SNAPPY_COMPRESSION = TRUE)
+PURGE = TRUE
+FORCE = TRUE;
 """
 
 logger.info(f'SF Query: {sql}')
 
 
-executor = SQLExecutor2(connection=sf_input_config['params']['connection'])
+executor = SQLExecutor2(connection=sf_output_config['params']['connection'])
 results = executor.query_to_df(sql)
 logger.info(results)
 
