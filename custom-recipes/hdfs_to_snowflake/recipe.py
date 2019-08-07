@@ -77,14 +77,13 @@ FROM '{sf_location}'
 FILE_FORMAT = (TYPE = PARQUET, SNAPPY_COMPRESSION = TRUE)
 PATTERN = '{sf_file_pattern}'
 FORCE = TRUE;
-COMMIT;
 """
 
 logger.info(f'SF Query: {sql}')
 
 
 executor = SQLExecutor2(connection=sf_output_config['params']['connection'])
-results = executor.query_to_df(sql)
+results = executor.query_to_df(sql, post_queries=["COMMIT"])
 logger.info(results)
 
 
