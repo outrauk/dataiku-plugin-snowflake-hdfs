@@ -75,7 +75,7 @@ SELECT {', '.join(columns)}
 FROM '{sf_location}'
 )
 FILE_FORMAT = (TYPE = PARQUET, SNAPPY_COMPRESSION = TRUE)
-PATTERN = {sf_file_pattern}
+PATTERN = '{sf_file_pattern}'
 FORCE = TRUE;
 """
 
