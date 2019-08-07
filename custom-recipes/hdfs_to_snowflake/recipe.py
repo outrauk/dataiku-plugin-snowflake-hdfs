@@ -35,7 +35,7 @@ sf_stage_name = sf_stage_name if sf_stage_name.startswith('@') else f'@{sf_stage
 
 logger.info(f'SF Stage: {sf_stage_name}')
 
-sql_table_name = f'"{sf_input_config["params"]["schema"]}"."{sf_input_config["params"]["table"]}"'
+sql_table_name = f'"{sf_output_config["params"]["schema"]}"."{sf_output_config["params"]["table"]}"'
 
 
 logger.info(f'SF Table: {sql_table_name}')
