@@ -11,10 +11,6 @@ logger = logging.getLogger('snowflake-hdfs-plugin')
 
 
 
-# Inputs and outputs are defined by roles. In the recipe's I/O tab, the user can associate one
-# or more dataset to each input and output role.
-# Roles need to be defined in recipe.json, in the inputRoles and outputRoles fields.
-
 # To  retrieve the datasets of an input role named 'input_A' as an array of dataset names:
 sf_input = dataiku.Dataset(get_input_names_for_role('sf_input')[0])
 sf_input_config = sf_input.get_config()
