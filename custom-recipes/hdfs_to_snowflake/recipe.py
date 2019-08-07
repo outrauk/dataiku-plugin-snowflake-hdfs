@@ -32,10 +32,12 @@ if not sf_stage_name:
 
 sf_stage_name = sf_stage_name if sf_stage_name.startswith('@') else f'@{sf_stage_name}'
 
+proj_key = dataiku.get_custom_variables()['projectKey']
+
 
 logger.info(f'SF Stage: {sf_stage_name}')
 
-sql_table_name = f'"{sf_output_config["params"]["schema"]}"."{sf_output_config["params"]["table"]}"'
+sql_table_name = f'"{sf_output_config["params"]["schema"]}"."{sf_output_config["params"]["table"]}"'.replace('${projectKey}', proj_key)
 
 
 logger.info(f'SF Table: {sql_table_name}')
@@ -48,7 +50,6 @@ sf_output.write_with_schema(sf_output_df)
 
 
 path = hdfs_input_config['params']['path']
-proj_key = dataiku.get_custom_variables()['projectKey']
 path = path.replace('${projectKey}', proj_key)
 
 # @PUBLIC.OUTRA_DATA_DATAIKU_EMR_MANAGED_STAGE
