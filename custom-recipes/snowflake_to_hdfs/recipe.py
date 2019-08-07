@@ -35,7 +35,7 @@ hdfs_output_config = hdfs_output.get_config()
 
 sf_stage_name = get_recipe_config()['snowflake_stage']
 
-sql_table_name = f'"{in_config["params"]["schema"]}"."{in_config["params"]["table"]}"'
+sql_table_name = f'"{sf_input_config["params"]["schema"]}"."{sf_input_config["params"]["table"]}"'
 
 # create output dataframe of zero rows
 hdfs_output_df = sf_input.get_dataframe().head(n=0)
