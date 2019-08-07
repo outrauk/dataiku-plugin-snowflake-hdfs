@@ -74,7 +74,6 @@ SELECT {', '.join(columns)}
 FROM '{sf_location}'
 )
 FILE_FORMAT = (TYPE = PARQUET, SNAPPY_COMPRESSION = TRUE)
-PURGE = TRUE
 FORCE = TRUE;
 """
 
