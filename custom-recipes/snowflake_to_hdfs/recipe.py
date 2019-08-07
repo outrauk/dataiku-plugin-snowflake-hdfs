@@ -46,10 +46,10 @@ hdfs_output.write_with_schema(hdfs_output_df)
 
 path = hdfs_output_config['params']['path']
 proj_key = dataiku.get_custom_variables()['projectKey']
-path = path.replace('${projectKey}', project_key)
+path = path.replace('${projectKey}', proj_key)
 
 # @PUBLIC.OUTRA_DATA_DATAIKU_EMR_MANAGED_STAGE
-stage = f'{sf_stage_name}{path.replace("${projectKey}", pk)}/part'
+stage = f'{sf_stage_name}{path}/part'
 
 # 1) delete the *.snappy.parquet that exists: threeuk_cell_id_location_parq.get_files_info()['globalPaths']
 # ... or don't care because we know it has zero rows
