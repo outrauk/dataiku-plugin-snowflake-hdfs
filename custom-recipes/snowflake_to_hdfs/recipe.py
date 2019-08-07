@@ -24,7 +24,9 @@ hdfs_output_config = hdfs_output.get_config()
 # check that the output is HDFS and Parquet
 # TODO: check that it's actually Parquet and Snappy
 
-sf_stage_name = get_recipe_config().get('snowflake_stage', get_plugin_config().get('default_sf_stage', ''))
+sf_stage_name = get_recipe_config().get('snowflake_stage', '')
+
+sf_stage_name = sf_stage_name if sf_stage_name else get_plugin_config().get('default_sf_stage', '')
 
 if not sf_stage_name:
     raise ValueError("Specify a Snowflake stage either in the plugin's settings or the recipe's settings.")
