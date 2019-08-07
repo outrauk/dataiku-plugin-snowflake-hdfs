@@ -53,11 +53,12 @@ path = hdfs_input_config['params']['path']
 path = path.replace('${projectKey}', proj_key)
 
 # @PUBLIC.OUTRA_DATA_DATAIKU_EMR_MANAGED_STAGE
+sf_location = f'{sf_stage_name}{path}/'
 # using "part_" gives file that were output by SF. "part-" is what gets output by DSS 
-sf_location = f'{sf_stage_name}{path}/part*.snappy.parquet'
-
+sf_file_pattern = '.*part.*\\.snappy\\.parquet'
 
 logger.info(f'SF Stage Location: {sf_location}')
+logger.info(f'SF File Pattern: {sf_file_pattern}')
 
 # 1) delete the *.snappy.parquet that exists: threeuk_cell_id_location_parq.get_files_info()['globalPaths']
 # ... or don't care because we know it has zero rows
@@ -74,6 +75,7 @@ SELECT {', '.join(columns)}
 FROM '{sf_location}'
 )
 FILE_FORMAT = (TYPE = PARQUET, SNAPPY_COMPRESSION = TRUE)
+PATTERN = {sf_file_pattern}
 FORCE = TRUE;
 """
 
