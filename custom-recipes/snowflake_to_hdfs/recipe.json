@@ -2,8 +2,8 @@
 {
     // Meta data for display purposes
     "meta" : {
-        "label" : "Custom recipe from recipe compute_threeuk_cell_id_location_parq",
-        "description" : "Custom recipe",
+        "label" : "Sync Snowflake to HDFS",
+        "description" : "Syncs a Snowflake data source to HDF",
         "icon" : "icon-puzzle-piece"
     },
 
@@ -19,44 +19,27 @@
 
     "inputRoles" : [
         {
-            "name": "input_A_role",
-            "label": "input A displayed name",
-            "description": "what input A means",
+            "name": "sf_input",
+            "label": "Snowflake Input",
+            "description": "Snowflake table",
             "arity": "UNARY",
             "required": true,
-            "acceptsDataset": true
-        },
-        {
-            "name": "input_B_role",
-            "label": "input B displayed name",
-            "description": "what input B means",
-            "arity": "NARY",
-            "required": false,
-            "acceptsDataset": true
-            // ,'mustBeSQL': true
-            // ,'mustBeStrictlyType':'HDFS'
+            "acceptsDataset": true,
+            "mustBeSQL": true,
+            "mustBeStrictlyType": "snowflake"
         }
-        // ...
     ],
 
     "outputRoles" : [
         {
-            "name": "main_output",
-            "label": "main output displayed name",
-            "description": "what main output means",
+            "name": "hdfs_output",
+            "label": "HDFS Output",
+            "description": "HDFS parquet dataset",
             "arity": "UNARY",
-            "required": false,
-            "acceptsDataset": true
-        },
-        {
-            "name": "errors_output",
-            "label": "errors output displayed name",
-            "description": "what errors output means",
-            "arity": "UNARY",
-            "required": false,
-            "acceptsDataset": true
+            "required": true,
+            "acceptsDataset": true,
+            "mustBeStrictlyType": "HDFS"
         }
-        // ...
     ],
 
     // The field "params" holds a list of all the params
@@ -67,46 +50,12 @@
 
     "params": [
         {
-            "name": "parameter1",
-            "label" : "User-readable label",
+            "name": "snowflake_stage",
+            "label" : "Snowflake Stage",
             "type": "STRING",
-            "description":"Some documentation for parameter1",
+            "description":"The name of a Snowflake stage that points to the output's connection",
             "mandatory" : true
-        },
-        {
-            "name": "parameter2",
-            "type": "INT",
-            "defaultValue" : 42
-            /* Note that standard json parsing will return it as a double in Python (instead of an int), so you need to write
-               int(get_recipe_config()['parameter2'])
-            */
-        },
-
-        // A "SELECT" parameter is a multi-choice selector. Choices are specified using the selectChoice field
-        {
-            "name": "parameter3",
-            "type": "SELECT",
-            "selectChoices": [
-                {
-                    "value": "val_x",
-                    "label": "display name for val_x"
-                },
-                {
-                    "value": "val_y",
-                    "label": "display name for val_y"
-                },
-            ]
-        },
-
-        // A 'COLUMN' parameter is a string, whose value is a column name from an input schema.
-        // To specify the input schema whose column names are used, use the "columnRole" field like below.
-        // The column names will come from the schema of the first dataset associated to that role.
-        {
-            "name": "parameter4",
-            "type": "COLUMN",
-            "columnRole":"input_B_role"
         }
-
         // The 'COLUMNS' type works in the same way, except that it is a list of strings.
     ],
 
