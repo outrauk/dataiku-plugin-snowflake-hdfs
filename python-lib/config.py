@@ -10,7 +10,7 @@ def get_stage_name(recipe_config: Mapping[AnyStr, AnyStr], plugin_config: Mappin
     """
     sf_stage_name = recipe_config.get('sf_stage', '')
     if not sf_stage_name:
-        sf_stage_name = plugin_config.get('default_sf', '')
+        sf_stage_name = plugin_config.get('default_sf_stage', '')
 
     if not sf_stage_name:
         raise ValueError('Snowflake Stage must be specified in the settings of the plugin or recipe.')
