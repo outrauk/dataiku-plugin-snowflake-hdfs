@@ -1,4 +1,4 @@
-from typing import AnyStr, Mapping, Any, List, TypedDict
+from typing import AnyStr, Mapping, Any, List
 
 def get_stage_name(recipe_config: Mapping[AnyStr, AnyStr], plugin_config: Mapping[AnyStr, AnyStr]) -> AnyStr:
     """
@@ -97,7 +97,7 @@ HEADER = TRUE;
     return sql
 
 
-def get_hdfs_to_snowflake_query(sf_location: AnyStr, sf_table_name: AnyStr, hdfs_schema: List[TypedDict[AnyStr, AnyStr]]) -> AnyStr:
+def get_hdfs_to_snowflake_query(sf_location: AnyStr, sf_table_name: AnyStr, hdfs_schema: List[Mapping[AnyStr, AnyStr]]) -> AnyStr:
     """
     Gets a COPY statement for copying from an HDFS location to a Snowflake table. Assumes the table
     already exists.
