@@ -1,0 +1,36 @@
+{
+    "id" : "snowflake-hdfs",
+
+    // Version. It is highly recommended to use Semantic Versioning
+    "version" : "0.0.1",
+
+
+    // Meta data for display purposes
+    "meta" : {
+        // Name of this plugin that appears in the interface.
+        "label" : "Snowflake HDFS Tools",
+
+        "description" : "Facilitates fast loading between Snowflake <--> HDFS",
+        "author" : "Outra (Matt Klaber)",
+
+        // The icon of a plugin must be one of the FontAwesome 3.1 icons
+        "icon" : "icon-exchange",
+
+        "licenseInfo" : "MIT",
+
+        // URL where the user can learn more about the plugin
+        "url" : "https://www.github.com/outrauk/dataiku-plugin-snowflake-hdfs",
+
+        // List of tags for filtering the list of plugins
+        "tags" : ["snowflake", "hdfs", "emrfs", "parquet", "sync"]
+    },
+    "params": [
+        {
+            "name": "default_sf_stage",
+            "type": "STRING",
+            "label": "Default Snowflake Stage",
+            "description": "This stage should point to the same folder as the managed HDFS connection",
+            "mandatory": false
+        }
+    ]
+}
