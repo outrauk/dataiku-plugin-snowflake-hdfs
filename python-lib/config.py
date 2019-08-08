@@ -1,5 +1,6 @@
 from typing import AnyStr, Mapping, Any, List
 
+
 def get_stage_name(recipe_config: Mapping[AnyStr, AnyStr], plugin_config: Mapping[AnyStr, AnyStr]) -> AnyStr:
     """
     Gets the best Snowflake STAGE to use based on configuration settings. Does not check that the stage itself
@@ -62,11 +63,15 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
     """
     _assert_dataset_type('HDFS', dataset_config['type'])
 
-    if dataset_config['formatType'] != 'parquet':
-        raise ValueError(f'Unsupported dataset format type {dataset_config["formatType"]}. Must be parquet.')
+    format_type: AnyStr = dataset_config['formatType']
 
-    if dataset_config['formatParams']['parquetCompressionMethod'] != 'SNAPPY':
-        raise ValueError(f"Unsupported compression method {dataset_config['formatParams']['parquetCompressionMethod']}. Must be SNAPPY.")
+    if format_type != 'parquet':
+        raise ValueError(f'Unsupported dataset format type {format_type}. Must be parquet.')
+
+    compression_method: AnyStr = dataset_config['formatParams']['parquetCompressionMethod']
+
+    if compression_method != 'SNAPPY':
+        raise ValueError(f'Unsupported compression method {compression_method}. Must be SNAPPY.')
 
     project_key: AnyStr = dataset_config['projectKey']
 
@@ -75,6 +80,7 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
     path = params['path'].replace('${projectKey}', project_key)
 
     return f'{sf_stage_name}{path}/'
+
 
 def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr) -> AnyStr:
     """

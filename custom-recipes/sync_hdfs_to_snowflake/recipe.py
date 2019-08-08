@@ -1,5 +1,3 @@
-import sys
-
 import dataiku
 from dataiku.customrecipe import *
 from dataiku.core.sql import SQLExecutor2
@@ -39,6 +37,3 @@ executor = SQLExecutor2(connection=sf_connection_name)
 results = executor.query_to_df(sql, post_queries=["COMMIT"])
 
 logger.info(f'COPY results: ${results.to_string()}')
-
-
-

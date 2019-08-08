@@ -41,5 +41,3 @@ executor = SQLExecutor2(connection=sf_connection_name)
 results = executor.query_to_df(sql)
 
 logger.info(f'COPY results: ${results.to_string()}')
-
-
