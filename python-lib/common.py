@@ -1,4 +1,5 @@
-import logging, sys
+import logging
+import sys
 from logging import Logger
 
 
@@ -13,4 +14,4 @@ def get_logger() -> Logger:
         level=logging.INFO,
         format='%(name)s - %(levelname)s - %(message)s'
     )
-    return logging.getLogger("snowflake-hdfs-plugin")
+    return logging.getLogger('snowflake-hdfs-plugin')
