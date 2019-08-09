@@ -113,6 +113,9 @@ def get_hdfs_to_snowflake_query(sf_location: AnyStr, sf_table_name: AnyStr,
     :param hdfs_schema: columns of the HDFS source
     :return: a SQL COPY statement
     """
+    if not hdfs_schema:
+        raise ValueError('hdfs_schema must have at least one column')
+
     columns = [f'$1:"{col["name"]}"' for col in hdfs_schema]
 
     sf_file_pattern = '.*\\.snappy\\.parquet'
