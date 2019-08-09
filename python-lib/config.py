@@ -103,7 +103,8 @@ HEADER = TRUE;
     return sql
 
 
-def get_hdfs_to_snowflake_query(sf_location: AnyStr, sf_table_name: AnyStr, hdfs_schema: List[Mapping[AnyStr, AnyStr]]) -> AnyStr:
+def get_hdfs_to_snowflake_query(sf_location: AnyStr, sf_table_name: AnyStr,
+                                hdfs_schema: List[Mapping[AnyStr, AnyStr]]) -> AnyStr:
     """
     Gets a COPY statement for copying from an HDFS location to a Snowflake table. Assumes the table
     already exists.
@@ -129,4 +130,3 @@ FORCE = TRUE;
     """
 
     return sql
-

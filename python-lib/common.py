@@ -1,4 +1,5 @@
-import logging, sys
+import logging
+import sys
 from logging import Logger
 
 
