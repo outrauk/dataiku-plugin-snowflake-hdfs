@@ -4,11 +4,14 @@ DSS plugin for fast loading Parquet files between Snowflake and HDFS.
 
 ## Prerequisites
 
-* Snowflake S3 `STAGE` that points to the same directory as DSS's managed HDFS connection
+* An HDFS connection in Dataiku that points to an S3 bucket
+* A [Snowflake S3 `STAGE`](https://docs.snowflake.net/manuals/user-guide/data-load-s3-create-stage.html) that points to the same S3 bucket and path as DSS's managed HDFS connection
 
-## Creating a Snowflake `STAGE`
+Your HDFS connection here:
 
-Though you may be able to create a stage that uses AWS credentials, it hasn't been tested. Instead, use an IAM role. The `STAGE` can be created like so:
+![image](https://user-images.githubusercontent.com/939816/62780119-da3bbc80-baac-11e9-8791-b9ee61da9d0d.png)
+
+Should match the `URL` here:
 
 ```sql
 CREATE OR REPLACE STAGE YOUR_ACCOUNT_DATAIKU_EMR_MANAGED_STAGE
@@ -17,9 +20,15 @@ CREATE OR REPLACE STAGE YOUR_ACCOUNT_DATAIKU_EMR_MANAGED_STAGE
 GRANT USAGE ON YOUR_ACCOUNT_DATAIKU_EMR_MANAGED_STAGE TO DSP_RW;
 ```
 
-Where the `URL` is the same S3 path configured in the HDFS connection within DSS.
+Note that this example uses an [AWS IAM role](https://docs.snowflake.net/manuals/user-guide/data-load-s3-config.html#option-2-configuring-an-aws-iam-role) for securing the stage's connection to your S3 bucket. There's no reason a stage secured using AWS access keys wouldn't work, but it has not been tested. 
 
-And you'd then reference it in the plugin as `@PUBLIC.YOUR_ACCOUNT_DATAIKU_EMR_MANAGED_STAGE`.
+
+## Configuring
+
+You can (optionally) configure a _Default Snowflake Stage_ in the plugin's settings. For example, the `STAGE` created above would be entered as `@PUBLIC.YOUR_ACCOUNT_DATAIKU_EMR_MANAGED_STAGE`.
+
+When using the recipe, you can override the default stage in the _Snowflake Stage_ setting. 
+
 
 
 ## Building in PyCharm
@@ -43,6 +52,15 @@ Second, install or update the package in this library's virtual environment. If 
 ```bash
 pip install dataiku --no-index --find-links file:///path/to/Downloads/dataiku-dss-5.1.5/python/dist
 ```
+
+## Installing
+
+To build the distribution, you'll either just install the plugin by referencing the GitHub repository or create a distribution zip:
+
+1. Ensure you have `json_pp` and `node` installed locally
+2. `make plugin`
+3. Upload the zip file from the `/dist` directory
+
 
 ## TODO
 
