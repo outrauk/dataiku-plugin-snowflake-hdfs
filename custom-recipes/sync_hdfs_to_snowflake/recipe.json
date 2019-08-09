@@ -1,0 +1,70 @@
+// This file is the descriptor for the Custom code recipe compute_threeuk_cell_id_location_parq
+{
+    // Meta data for display purposes
+    "meta" : {
+        "label" : "Sync HDFS to Snowflake",
+        "description" : "Syncs an HDFS data source to a Snowflake table",
+        "icon" : "icon-exchange"
+    },
+
+    "kind" : "PYTHON",
+    "selectableFromDataset": "hdfs_input",
+
+    // Inputs and outputs are defined by roles. In the recipe's I/O tab, the user can associate one
+    // or more dataset to each input and output role.
+
+    // The "arity" field indicates whether the user can associate several datasets to the role ('NARY')
+    // or at most one ('UNARY'). The "required" field indicates whether the user is allowed to
+    // associate no dataset with the role.
+
+    "inputRoles" : [
+        {
+            "name": "hdfs_input",
+            "label": "HDFS Input",
+            "description": "HDFS parquet dataset",
+            "arity": "UNARY",
+            "required": true,
+            "acceptsDataset": true,
+            "mustBeStrictlyType": "HDFS"
+        }
+    ],
+
+    "outputRoles" : [
+        {
+            "name": "sf_output",
+            "label": "Snowflake Output",
+            "description": "Snowflake table",
+            "arity": "UNARY",
+            "required": true,
+            "acceptsDataset": true,
+            "mustBeSQL": true,
+            "mustBeStrictlyType": "Snowflake"
+        }
+    ],
+
+    // The field "params" holds a list of all the params
+    // for wich the user will be prompted for values in the Settings tab of the recipe.
+
+    // The available parameter types are:
+    // STRING, INT, DOUBLE, BOOLEAN, PASSWORD, SELECT, MAP, COLUMN, COLUMNS, TEXTAREA
+
+    "params": [
+        {
+            "name": "sf_stage",
+            "label" : "Snowflake Stage",
+            "type": "STRING",
+            "description":"The name of a Snowflake stage that points to the output's HDFS managed path. Uses plugin's default if not specified.",
+            "mandatory" : false
+        }
+        // The 'COLUMNS' type works in the same way, except that it is a list of strings.
+    ],
+
+    // The field "resourceKeys" holds a list of keys that allows to limit the number
+    // of concurrent executions and activities triggered by this recipe.
+    //
+    // Administrators can configure the limit per resource key in the Administration > Settings > Flow build
+    // screen.
+
+    "resourceKeys" : []
+
+}

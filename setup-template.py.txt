@@ -1,0 +1,20 @@
+from setuptools import setup
+
+setup(
+    name='dataiku',
+    version='1.0.0',
+    packages=['dataiku', 'dataiku.sql', 'dataiku.base', 'dataiku.core', 'dataiku.spark', 'dataiku.doctor',
+              'dataiku.doctor.utils', 'dataiku.doctor.crossval', 'dataiku.doctor.clustering',
+              'dataiku.doctor.prediction', 'dataiku.doctor.posttraining', 'dataiku.doctor.deep_learning',
+              'dataiku.doctor.preprocessing', 'dataiku.dsscli', 'dataiku.metric', 'dataiku.apinode',
+              'dataiku.apinode.admin', 'dataiku.apinode.predict', 'dataiku.cluster', 'dataiku.webapps',
+              'dataiku.customui', 'dataiku.exporter', 'dataiku.insights', 'dataiku.notebook', 'dataiku.scenario',
+              'dataiku.connector', 'dataiku.container', 'dataiku.runnables', 'dataiku.customstep', 'dataiku.fsprovider',
+              'dataiku.customformat', 'dataiku.customrecipe', 'dataiku.customwebapp', 'dataiku.customtrigger',
+              'dataikuapi', 'dataikuapi.dss', 'dataikuapi.apinode_admin'],
+    url='',
+    license='',
+    author='',
+    author_email='',
+    description=''
+)
