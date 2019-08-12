@@ -6,3 +6,7 @@ plugin:
 	rm -rf dist
 	mkdir dist
 	zip -r dist/dss-plugin-${PLUGIN_ID}-${PLUGIN_VERSION}.zip plugin.json custom-recipes code-env python-lib README.md LICENSE
+
+clean:
+	rm -rf dist
+	rm -rf lib

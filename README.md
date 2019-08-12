@@ -66,23 +66,10 @@ When using the recipe, you can override the default stage in the _Snowflake Stag
 
 Custom Recipe libraries aren't included in DSS's `dataiku-internal-client` package so we need to fake it 'til we make it.
 
-First, create the package:
+First, create the package by executing `./make_dss_pip.sh`. If successful, the last line it prints is a `pip` command.
 
-```bash
-cd ~/Downloads/
-wget https://cdn.downloads.dataiku.com/public/dss/5.1.5/dataiku-dss-5.1.5.tar.gz
-tar -zxf dataiku-dss-5.1.5.tar.gz
-cd -
-cp setup-template.py.txt ~/Downloads/dataiku-dss-5.1.5/python/setup.py
-cd ~/Downloads/dataiku-dss-5.1.5/python/
-python setup.py sdist
-```
+Second, use the `pip` command from the previous step to install the package in the library's virtual environment. (If you're using PyCharm, open _View_ &rarr; _Tool Windows_ &rarr; _Terminal_ and paste the `pip` command in.)
 
-Second, install or update the package in this library's virtual environment. If you're using PyCharm, open a Terminal (from "View") and enter:
-
-```bash
-pip install dataiku --no-index --find-links file:///path/to/Downloads/dataiku-dss-5.1.5/python/dist
-```
 
 
 ## TODO

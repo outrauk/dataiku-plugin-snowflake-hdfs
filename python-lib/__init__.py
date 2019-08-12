@@ -1,2 +1,2 @@
-from .common import get_logger
+from .common import *
 from .config import *
