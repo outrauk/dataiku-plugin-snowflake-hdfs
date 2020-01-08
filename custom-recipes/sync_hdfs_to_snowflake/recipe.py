@@ -24,7 +24,7 @@ logger.info(f'SF Table: {sf_table_name}')
 logger.info(f'SF Connection Name: {sf_connection_name}')
 
 # create output dataframe of zero rows
-sf_output_df = hdfs_input.get_dataframe().head(n=0)
+sf_output_df = hdfs_input.get_dataframe(sampling='head', limit=1).head(n=0)
 
 # write Snowflake table
 sf_output.write_with_schema(sf_output_df)
@@ -34,6 +34,6 @@ sql = get_hdfs_to_snowflake_query(sf_location, sf_table_name, hdfs_input.read_sc
 logger.info(f'SF Query: {sql}')
 
 executor = SQLExecutor2(connection=sf_connection_name)
-results = executor.query_to_df(sql, post_queries=["COMMIT"])
+results = executor.query_to_df(sql, post_queries=['COMMIT'])
 
 logger.info(f'COPY results: ${results.to_string()}')

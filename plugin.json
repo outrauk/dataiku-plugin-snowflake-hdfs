@@ -1,6 +1,6 @@
 {
     "id" : "snowflake-hdfs",
-    "version" : "0.0.2",
+    "version" : "0.0.3",
     "meta" : {
         "label" : "Snowflake HDFS Tools",
         "description" : "Facilitates fast loading between Snowflake <--> HDFS",
