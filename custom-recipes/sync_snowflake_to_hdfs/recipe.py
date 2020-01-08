@@ -24,7 +24,7 @@ logger.info(f'SF Table: {sf_table_name}')
 logger.info(f'SF Connection Name: {sf_connection_name}')
 
 # create output dataframe of zero rows
-hdfs_output_df = sf_input.get_dataframe().head(n=0)
+hdfs_output_df = sf_input.get_dataframe(sampling='head', limit=1).head(n=0)
 
 # write HDFS
 hdfs_output.write_with_schema(hdfs_output_df)
