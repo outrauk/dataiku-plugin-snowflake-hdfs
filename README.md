@@ -70,7 +70,10 @@ First, create the package by executing `./make_dss_pip.sh`. If successful, the l
 
 Second, use the `pip` command from the previous step to install the package in the library's virtual environment. (If you're using PyCharm, open _View_ &rarr; _Tool Windows_ &rarr; _Terminal_ and paste the `pip` command in.)
 
+## Running Tests in PyCharm
 
+1. Make sure you can build the project by doing all of the `pip` steps above
+2. In PyCharm, run the _Unit Tests_ configuration.
 
 ## TODO
 
