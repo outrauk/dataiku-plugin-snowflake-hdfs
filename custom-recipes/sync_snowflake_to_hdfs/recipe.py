@@ -23,15 +23,12 @@ logger.info(f'SF Stage: {sf_stage_name}')
 logger.info(f'SF Table: {sf_table_name}')
 logger.info(f'SF Connection Name: {sf_connection_name}')
 
-# create output dataframe of zero rows
-hdfs_output_df = sf_input.get_dataframe(sampling='head', limit=1).head(n=0)
+# write the schema for our HDFS table
+hdfs_output.write_schema(sf_input.read_schema(), dropAndCreate=True)
 
-# write HDFS
-hdfs_output.write_with_schema(hdfs_output_df)
-
-# possibly delete the *.snappy.parquet that exists: hdfs_output.get_files_info()['globalPaths']
-# (it got created by the write_with_schema above)
-# ... or don't care because we know it has zero rows
+# open a writer and close it so that it'll force DSS to create the table.
+with hdfs_output.get_writer():
+    pass
 
 sql = get_snowflake_to_hdfs_query(sf_location, sf_table_name)
 

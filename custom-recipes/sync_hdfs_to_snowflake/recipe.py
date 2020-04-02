@@ -23,11 +23,12 @@ logger.info(f'SF Stage: {sf_stage_name}')
 logger.info(f'SF Table: {sf_table_name}')
 logger.info(f'SF Connection Name: {sf_connection_name}')
 
-# create output dataframe of zero rows
-sf_output_df = hdfs_input.get_dataframe(sampling='head', limit=1).head(n=0)
+# write the schema for our Snowflake table
+sf_output.write_schema(hdfs_input.read_schema(), dropAndCreate=True)
 
-# write Snowflake table
-sf_output.write_with_schema(sf_output_df)
+# open a writer and close it so that it'll force DSS to create the table.
+with sf_output.get_writer():
+    pass
 
 sql = get_hdfs_to_snowflake_query(sf_location, sf_table_name, hdfs_input.read_schema())
 
