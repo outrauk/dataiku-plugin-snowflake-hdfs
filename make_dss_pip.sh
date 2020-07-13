@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION=$(curl -v --silent https://www.dataiku.com/dss/trynow/linux/ 2>&1 | grep -e 'var cur_version' | sed -n 's/^.*"\(.*\)".*$/\1/p')
+VERSION=$(curl -L -v --silent https://www.dataiku.com/dss/trynow/linux/ 2>&1 | grep -e 'var cur_version' | sed -n 's/^.*"\(.*\)".*$/\1/p')
+
+if [ -z "$VERSION" ]; then
+  echo "Can't find a DSS version"
+  exit
+fi
 
 mkdir -p lib
 
