@@ -30,7 +30,7 @@ hdfs_output.write_schema(sf_input.read_schema(), dropAndCreate=True)
 with hdfs_output.get_writer():
     pass
 
-sql = get_snowflake_to_hdfs_query(sf_location, sf_table_name)
+sql = get_snowflake_to_hdfs_query(sf_location, sf_table_name, sf_input_config['schema']['columns'])
 
 logger.info(f'SF Query: {sql}')
 

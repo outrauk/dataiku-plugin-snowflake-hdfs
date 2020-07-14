@@ -232,12 +232,23 @@ class QueryCreationTests(ConfigTests):
     def test_get_snowflake_to_hdfs_query_creates_query(self):
         location = '@STAGE_EXAMPLE/foo/bar/'
         table = '"SCHEMAGIC"."TABLELATOR"'
+        schema = [
+            {
+                'name': 'col1', 'originalType': 'TIMESTAMPLTZ'
+            },
+            {
+                'name': 'col2', 'originalType': 'TIMESTAMPTZ'
+            },
+            {
+                'name': 'col3', 'originalType': 'DATE'
+            }
+        ]
 
-        sql = get_snowflake_to_hdfs_query(location, table)
+        sql = get_snowflake_to_hdfs_query(location, table, schema)
 
         self.assertEqual(sql.strip(), f"""
 COPY INTO '{location}'
-FROM {table}
+FROM (SELECT "col1"::TIMESTAMP AS "col1","col2"::TIMESTAMP AS "col2","col3" FROM {table})
 FILE_FORMAT = (TYPE = PARQUET)
 OVERWRITE = TRUE
 HEADER = TRUE;

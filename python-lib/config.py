@@ -82,26 +82,37 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
     return f'{sf_stage_name}{path}/'
 
 
-def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr) -> AnyStr:
+def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
+                                sf_schema: List[Mapping[AnyStr, AnyStr]]) -> AnyStr:
     """
     Gets a COPY statement for copying from a Snowflake Table to an HDFS location
-    :param sf_location:
-    :param sf_table_name:
+    :param sf_location: HDFS location
+    :param sf_table_name: Snowflake table
+    :param sf_schema: Snowflake schema
     :return: a SQL COPY statement
     """
     # moving this function here isn't strictly necessary as it's not re-used, but it makes
     # things significantly easier to unit test.
 
+    # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP
+    # This is required as COPY command does not support TZ and LTZ. See AOBS-491 for more details
+    columns = ''
+    for col in sf_schema:
+        columns += '"'+col['name']+'"'
+        if col['originalType'] in ['TIMESTAMPLTZ', 'TIMESTAMPTZ']:
+            columns += '::TIMESTAMP AS "'+col['name']+'"'
+        columns += ','
+    columns = columns[:-1]
+
     sql = f"""
 COPY INTO '{sf_location}'
-FROM {sf_table_name}
+FROM (SELECT {columns} FROM {sf_table_name})
 FILE_FORMAT = (TYPE = PARQUET)
 OVERWRITE = TRUE
 HEADER = TRUE;
     """
 
     return sql
-
 
 def get_hdfs_to_snowflake_query(sf_location: AnyStr, sf_table_name: AnyStr,
                                 hdfs_schema: List[Mapping[AnyStr, AnyStr]]) -> AnyStr:
