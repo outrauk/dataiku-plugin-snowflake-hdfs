@@ -64,7 +64,7 @@ When using the recipe, you can override the default stage in the _Snowflake Stag
 
 ## Building in PyCharm
 
-Make sure that wget is installed. For Mac run `brew install wget` to install wget.
+Make sure that [wget](https://www.gnu.org/software/wget/) is installed. For macOS, you can install via `brew install wget`.
 
 Custom Recipe libraries aren't included in DSS's `dataiku-internal-client` package so we need to fake it 'til we make it.
 
