@@ -95,7 +95,7 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
     # things significantly easier to unit test.
 
     # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP
-    # This is required as COPY command does not support TZ and LTZ. See AOBS-491 for more details
+    # This is required as COPY command does not support TZ and LTZ
     columns = ''
     for col in sf_schema:
         columns += '"'+col['name']+'"'
