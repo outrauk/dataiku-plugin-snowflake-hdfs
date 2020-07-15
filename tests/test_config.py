@@ -248,7 +248,10 @@ class QueryCreationTests(ConfigTests):
 
         self.assertEqual(sql.strip(), f"""
 COPY INTO '{location}'
-FROM (SELECT "col1"::TIMESTAMP AS "col1","col2"::TIMESTAMP AS "col2","col3" FROM {table})
+FROM (
+    SELECT "col1"::TIMESTAMP AS "col1", "col2"::TIMESTAMP AS "col2", "col3"
+    FROM {table}
+)
 FILE_FORMAT = (TYPE = PARQUET)
 OVERWRITE = TRUE
 HEADER = TRUE;

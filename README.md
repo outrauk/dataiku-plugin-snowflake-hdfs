@@ -77,6 +77,10 @@ Second, use the `pip` command from the previous step to install the package in t
 1. Make sure you can build the project by doing all of the `pip` steps above
 2. In PyCharm, run the _Unit Tests_ configuration.
 
+## Known Issues
++ All TIMESTAMP (LTZ, TZ, NTZ) and DATE columns from Snowflake are stored as [Unix Timestamp](https://www.unixtimestamp.com/) in Parquet.
+  This is currently recognised as int by Dataiku and will need extra parsing.
+
 ## TODO
 
 - [x] When Snowflake is an input, check that it's a table and not a query

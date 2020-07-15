@@ -96,23 +96,25 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
 
     # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP
     # This is required as COPY command does not support TZ and LTZ
-    columns = ''
-    for col in sf_schema:
-        columns += '"'+col['name']+'"'
-        if col['originalType'] in ['TIMESTAMPLTZ', 'TIMESTAMPTZ']:
-            columns += '::TIMESTAMP AS "'+col['name']+'"'
-        columns += ','
-    columns = columns[:-1]
+    columns = [
+        f'"{c["name"]}"'
+        + (f'::TIMESTAMP AS "{c["name"]}"' if c['originalType'] in ['TIMESTAMPLTZ', 'TIMESTAMPTZ'] else '')
+        for c in sf_schema
+    ]
 
     sql = f"""
 COPY INTO '{sf_location}'
-FROM (SELECT {columns} FROM {sf_table_name})
+FROM (
+    SELECT {', '.join(columns)}
+    FROM {sf_table_name}
+)
 FILE_FORMAT = (TYPE = PARQUET)
 OVERWRITE = TRUE
 HEADER = TRUE;
     """
 
     return sql
+
 
 def get_hdfs_to_snowflake_query(sf_location: AnyStr, sf_table_name: AnyStr,
                                 hdfs_schema: List[Mapping[AnyStr, AnyStr]]) -> AnyStr:
