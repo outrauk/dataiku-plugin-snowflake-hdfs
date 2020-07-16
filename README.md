@@ -80,7 +80,7 @@ Second, use the `pip` command from the previous step to install the package in t
 ## Known Issues
 * Neither Snowflake nor Dataiku use [Logical Type annotations](https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#datetime-types) for timezone offsets (Dataiku doesn't use Logical Types at all). When synching from Snowflake to HDFS, the plugin casts any `TIMESTAMP_TZ` or `TIMESTAMP_LTZ` columns to `TIMESTAMP_NTZ` which simply drops the timezone offset attribute. For greater control of this behaviour, transform your Snowflake table before passing it to this plugin. Consider using `CONVERT_TIMEZONE('UTC', t."date")::TIMESTAMP_NTZ`.
   See [Date & Time Data Types in Snowflake](https://docs.snowflake.com/en/sql-reference/data-types-datetime.html) for more details.
-+ All TIMESTAMP (LTZ, TZ, NTZ) and DATE columns from Snowflake are stored as INTEGER in Parquet.
+* Snowflake stores all `TIMESTAMP_NTZ` and `DATE` columns as annotated logical types in Parquet. Because Dataiku does not support logical types, these appear in Dataiku as `bigint` (`int64` as `datetime`) and `int` (`int32` as `date`). More details and workarounds are described in #12 
   See [this article](https://bigpicture.pl/blog/2017/11/timestamps-parquet-hadoop/#:~:text=Timestamp%20in%20Hive&text=They%20are%20interpreted%20as%20timestamps,depends%20on%20the%20file%20format.) for more details about Timestamp in Parquet.
 
 ## TODO
