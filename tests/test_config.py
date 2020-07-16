@@ -249,7 +249,7 @@ class QueryCreationTests(ConfigTests):
         self.assertEqual(sql.strip(), f"""
 COPY INTO '{location}'
 FROM (
-    SELECT "col1"::TIMESTAMP AS "col1", "col2"::TIMESTAMP AS "col2", "col3"
+    SELECT "col1"::TIMESTAMP_NTZ AS "col1", "col2"::TIMESTAMP_NTZ AS "col2", "col3"
     FROM {table}
 )
 FILE_FORMAT = (TYPE = PARQUET)

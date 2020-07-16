@@ -94,11 +94,11 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
     # moving this function here isn't strictly necessary as it's not re-used, but it makes
     # things significantly easier to unit test.
 
-    # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP
+    # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP_NTZ
     # This is required as the COPY command does not support TZ and LTZ
     columns = [
         f'"{c["name"]}"'
-        + (f'::TIMESTAMP AS "{c["name"]}"' if c['originalType'] in ['TIMESTAMPLTZ', 'TIMESTAMPTZ'] else '')
+        + (f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in ['TIMESTAMPLTZ', 'TIMESTAMPTZ'] else '')
         for c in sf_schema
     ]
 

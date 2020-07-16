@@ -78,8 +78,10 @@ Second, use the `pip` command from the previous step to install the package in t
 2. In PyCharm, run the _Unit Tests_ configuration.
 
 ## Known Issues
-+ All TIMESTAMP (LTZ, TZ, NTZ) and DATE columns from Snowflake are stored as [Unix Timestamp](https://www.unixtimestamp.com/) in Parquet.
-  This is currently recognised as int by Dataiku and will need extra parsing.
++ Currently Parquet does not support TIMESTAMP_TZ and TIMESTAMP_LTZ data types so they are converted to TIMESTAMP_NTZ.
+  As a result timezone details are removed from the TIMESTAMP. See [Date & Time Data Types in Snowflake](https://docs.snowflake.com/en/sql-reference/data-types-datetime.html) for more details.
++ All TIMESTAMP (LTZ, TZ, NTZ) and DATE columns from Snowflake are stored as INTEGER in Parquet.
+  See [this article](https://bigpicture.pl/blog/2017/11/timestamps-parquet-hadoop/#:~:text=Timestamp%20in%20Hive&text=They%20are%20interpreted%20as%20timestamps,depends%20on%20the%20file%20format.) for more details about Timestamp in Parquet.
 
 ## TODO
 
