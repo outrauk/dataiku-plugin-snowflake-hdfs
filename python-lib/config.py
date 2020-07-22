@@ -82,6 +82,29 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
     return f'{sf_stage_name}{path}/'
 
 
+def get_table_schema(sf_table_name: AnyStr, executor: Any) -> List[Mapping[AnyStr, AnyStr]]:
+    """
+        For given table extracts list of columns and datatypes from DB
+        :param sf_table_name: Snowflake table in format of "schema"."table"
+        :param executor: instance of dataiku.core.sql.SQLExecutor2
+        :return: List of dict records: [{'name': 'name', 'originalType': 'type'}...]
+    """
+    tab = sf_table_name.replace('"', '')
+    schema = tab.split('.')[0]
+    table = tab.split('.')[1]
+
+    sql = f'''
+    SELECT column_name AS "name", data_type AS "originalType"
+    FROM information_schema.columns
+    WHERE table_name = '{table}'
+    '''
+    if schema:
+        sql += f" AND table_schema = '{schema}'"
+    df = executor.query_to_df(sql)
+    result = df.to_dict('records')
+    return result
+
+
 def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
                                 sf_schema: List[Mapping[AnyStr, AnyStr]]) -> AnyStr:
     """
