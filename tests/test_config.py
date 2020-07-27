@@ -350,8 +350,7 @@ class TableSchemaTests(ConfigTests):
         self.result = f"""
 SELECT column_name AS "name", data_type AS "originalType"
 FROM information_schema.columns
-WHERE table_name = 'B'
-  AND table_schema = 'A'
+WHERE table_name = 'B' AND table_schema = 'A'
         """.strip()
 
     def test_get_table_schema_sql_no_quotes(self):
