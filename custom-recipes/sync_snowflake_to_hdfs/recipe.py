@@ -31,11 +31,12 @@ with hdfs_output.get_writer():
     pass
 
 executor = SQLExecutor2(connection=sf_connection_name)
-sh = get_table_schema(sf_table_name, executor)
+sql = get_table_schema_sql(sf_table_name)
+logger.info(f'Table schema query: {sql}')
+sh = executor.query_to_df(sql).to_dict('records')
+
 sql = get_snowflake_to_hdfs_query(sf_location, sf_table_name, sh)
-
 logger.info(f'SF Query: {sql}')
-
 results = executor.query_to_df(sql)
 
 logger.info(f'COPY results: ${results.to_string()}')

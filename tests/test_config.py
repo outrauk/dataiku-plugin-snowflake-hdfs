@@ -345,5 +345,23 @@ FORCE = TRUE;
             """.strip())
 
 
+class TableSchemaTests(ConfigTests):
+    def setUp(self):
+        self.result = f"""
+SELECT column_name AS "name", data_type AS "originalType"
+FROM information_schema.columns
+WHERE table_name = 'B'
+  AND table_schema = 'A'
+        """.strip()
+
+    def test_get_table_schema_sql_1(self):
+        sql = get_table_schema_sql('A.B')
+        self.assertEqual(sql.strip(), self.result)
+
+    def test_get_table_schema_sql_2(self):
+        sql = get_table_schema_sql('"A"."B"')
+        self.assertEqual(sql.strip(), self.result)
+
+
 if __name__ == '__main__':
     unittest.main()
