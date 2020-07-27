@@ -95,8 +95,10 @@ def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
     sql = f'''
 SELECT column_name AS "name", data_type AS "originalType"
 FROM information_schema.columns
-WHERE table_name = '{table}' AND table_schema = '{schema}'
+WHERE table_name = '{table}'
 '''
+    if schema:
+        sql += f" AND table_schema = '{schema}'"
 
     return sql
 

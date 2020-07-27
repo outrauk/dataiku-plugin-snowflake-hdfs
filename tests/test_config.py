@@ -346,20 +346,22 @@ FORCE = TRUE;
 
 
 class TableSchemaTests(ConfigTests):
-    def setUp(self):
-        self.result = f"""
+    def test_get_table_schema_sql_no_schema(self):
+        sql = get_table_schema_sql('""."B"')
+        self.assertEqual(sql.strip(), f"""
 SELECT column_name AS "name", data_type AS "originalType"
 FROM information_schema.columns
-WHERE table_name = 'B' AND table_schema = 'A'
-        """.strip()
+WHERE table_name = 'B'
+        """.strip())
 
-    def test_get_table_schema_sql_no_quotes(self):
-        sql = get_table_schema_sql('A.B')
-        self.assertEqual(sql.strip(), self.result)
-
-    def test_get_table_schema_sql_quotes(self):
+    def test_get_table_schema_sql_with_schema(self):
         sql = get_table_schema_sql('"A"."B"')
-        self.assertEqual(sql.strip(), self.result)
+        self.assertEqual(sql.strip(), f"""
+SELECT column_name AS "name", data_type AS "originalType"
+FROM information_schema.columns
+WHERE table_name = 'B'
+ AND table_schema = 'A'
+        """.strip())
 
 
 if __name__ == '__main__':
