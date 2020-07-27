@@ -354,11 +354,11 @@ WHERE table_name = 'B'
   AND table_schema = 'A'
         """.strip()
 
-    def test_get_table_schema_sql_1(self):
+    def test_get_table_schema_sql_no_quotes(self):
         sql = get_table_schema_sql('A.B')
         self.assertEqual(sql.strip(), self.result)
 
-    def test_get_table_schema_sql_2(self):
+    def test_get_table_schema_sql_quotes(self):
         sql = get_table_schema_sql('"A"."B"')
         self.assertEqual(sql.strip(), self.result)
 

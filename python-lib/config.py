@@ -84,9 +84,9 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
 
 def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
     """
-        Generates SQL to extract table columns from DB
-        :param sf_table_name: Snowflake table in format of "schema"."table"
-        :return: SQL for getting table columns
+    Generates SQL to extract table columns from DB
+    :param sf_table_name: Snowflake table in format of "schema"."table". Note that schema and table are case-sensitive.
+    :return: SQL for getting table columns
     """
     tab = sf_table_name.replace('"', '')
     schema = tab.split('.')[0]
