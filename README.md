@@ -21,7 +21,7 @@ CREATE OR REPLACE STAGE YOUR_ACCOUNT_DATAIKU_EMR_MANAGED_STAGE
 GRANT USAGE ON YOUR_ACCOUNT_DATAIKU_EMR_MANAGED_STAGE TO DSS_SF_ROLE_NAME;
 ```
 
-Note that this example uses an [AWS IAM role](https://docs.snowflake.net/manuals/user-guide/data-load-s3-config.html#option-2-configuring-an-aws-iam-role) for securing the stage's connection to your S3 bucket. There's no reason a stage secured using AWS access keys wouldn't work, but it has not been tested. 
+Note that this example uses an [AWS IAM role](https://docs.snowflake.net/manuals/user-guide/data-load-s3-config.html#option-2-configuring-an-aws-iam-role) for securing the stage's connection to your S3 bucket. There's no reason a stage secured using AWS access keys wouldn't work, but it has not been tested.
 
 
 ## Installing
@@ -38,7 +38,7 @@ Or, you can create a Zip file and following [these instructions](https://doc.dat
 
 You can (optionally) configure a _Default Snowflake Stage_ in the plugin's settings. For example, the `STAGE` created above would be entered as `@PUBLIC.YOUR_ACCOUNT_DATAIKU_EMR_MANAGED_STAGE`.
 
-When using the recipe, you can override the default stage in the _Snowflake Stage_ setting. 
+When using the recipe, you can override the default stage in the _Snowflake Stage_ setting.
 
 ## Usage
 
@@ -64,6 +64,8 @@ When using the recipe, you can override the default stage in the _Snowflake Stag
 
 ## Building in PyCharm
 
+Make sure that [wget](https://www.gnu.org/software/wget/) is installed. For macOS, you can install via `brew install wget`.
+
 Custom Recipe libraries aren't included in DSS's `dataiku-internal-client` package so we need to fake it 'til we make it.
 
 First, create the package by executing `./make_dss_pip.sh`. If successful, the last line it prints is a `pip` command.
@@ -75,6 +77,12 @@ Second, use the `pip` command from the previous step to install the package in t
 1. Make sure you can build the project by doing all of the `pip` steps above
 2. In PyCharm, run the _Unit Tests_ configuration.
 
+## Known Issues
+
+* Neither Snowflake nor Dataiku use [Logical Type annotations](https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#datetime-types) for timezone offsets (Dataiku doesn't use Logical Types at all). When synching from Snowflake to HDFS, the plugin casts any `TIMESTAMP_TZ` or `TIMESTAMP_LTZ` columns to `TIMESTAMP_NTZ` which simply drops the timezone offset attribute. For greater control of this behaviour, transform your Snowflake table before passing it to this plugin. Consider using `CONVERT_TIMEZONE('UTC', t."date")::TIMESTAMP_NTZ`. See [Date & Time Data Types in Snowflake](https://docs.snowflake.com/en/sql-reference/data-types-datetime.html) for more details.
+* Snowflake stores all `TIMESTAMP_NTZ` and `DATE` columns as annotated logical types in Parquet. Because Dataiku does not support logical types, these appear in Dataiku as `bigint` (`int64` as `datetime`) and `int` (`int32` as `date`). More details and workarounds are described in #12
+
+
 ## TODO
 
 - [x] When Snowflake is an input, check that it's a table and not a query
@@ -84,3 +92,5 @@ Second, use the `pip` command from the previous step to install the package in t
 - [ ] For Snowflake to HDFS, delete the *.parquet.snappy file in the output path (it's the one created when inserting the empty dataframe)
 - [ ] Support more types than Parquet (e.g., `CSV`, `AVRO`, etc.)
 - [ ] Verify that the HDFS connection is actually an S3 location (possibly the best way to enforce the `STAGE` lining up to HDFS)
+- [ ] Implement workarounds for #12
+- [ ] Convert TS columns to UTC using `CONVERT_TIMEZONE`

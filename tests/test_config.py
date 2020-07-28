@@ -232,16 +232,65 @@ class QueryCreationTests(ConfigTests):
     def test_get_snowflake_to_hdfs_query_creates_query(self):
         location = '@STAGE_EXAMPLE/foo/bar/'
         table = '"SCHEMAGIC"."TABLELATOR"'
+        schema = [
+            {
+                'name': 'col1', 'originalType': 'VARCHAR'
+            },
+            {
+                'name': 'col2', 'originalType': 'DATE'
+            },
+            {
+                'name': 'col3', 'originalType': 'BOOLEAN'
+            }
+        ]
 
-        sql = get_snowflake_to_hdfs_query(location, table)
+        sql = get_snowflake_to_hdfs_query(location, table, schema)
 
         self.assertEqual(sql.strip(), f"""
 COPY INTO '{location}'
-FROM {table}
+FROM (
+    SELECT "col1", "col2", "col3"
+    FROM {table}
+)
 FILE_FORMAT = (TYPE = PARQUET)
 OVERWRITE = TRUE
 HEADER = TRUE;
             """.strip())
+
+    def test_get_snowflake_to_hdfs_query_casts_columns(self):
+        schema = [
+            {
+                'name': 'col1', 'originalType': 'TIMESTAMPLTZ'
+            },
+            {
+                'name': 'col2', 'originalType': 'TIMESTAMPTZ'
+            },
+            {
+                'name': 'col3', 'originalType': 'DATE'
+            },
+            {
+                'name': 'col4', 'originalType': 'TIMESTAMP'
+            },
+            {
+                'name': 'col5', 'originalType': 'VARCHAR'
+            },
+            {
+                # Alias for TIMESTAMP_NTZ https://docs.snowflake.com/en/sql-reference/data-types-datetime.html#datetime
+                'name': 'col6', 'originalType': 'DATETIME'
+            }
+        ]
+
+        sql = get_snowflake_to_hdfs_query('@STAGE_EXAMPLE/foo/bar/', '"SCHEMAGIC"."TABLELATOR"', schema)
+
+        expected_columns = f'"{schema[0]["name"]}"::TIMESTAMP_NTZ AS "{schema[0]["name"]}", ' \
+                           f'"{schema[1]["name"]}"::TIMESTAMP_NTZ AS "{schema[1]["name"]}", ' \
+                           f'"{schema[2]["name"]}", ' \
+                           f'"{schema[3]["name"]}"::TIMESTAMP_NTZ AS "{schema[3]["name"]}", ' \
+                           f'"{schema[4]["name"]}", ' \
+                           f'"{schema[5]["name"]}"'
+
+        self.assertRegex(sql, re.escape(expected_columns))
+
 
     def test_get_hdfs_to_snowflake_query_requires_a_column(self):
 
@@ -294,6 +343,25 @@ FILE_FORMAT = (TYPE = PARQUET, SNAPPY_COMPRESSION = TRUE)
 PATTERN = '.*\\.snappy\\.parquet'
 FORCE = TRUE;
             """.strip())
+
+
+class TableSchemaTests(ConfigTests):
+    def test_get_table_schema_sql_no_schema(self):
+        sql = get_table_schema_sql('""."B"')
+        self.assertEqual(sql.strip(), f"""
+SELECT column_name AS "name", data_type AS "originalType"
+FROM information_schema.columns
+WHERE table_name = 'B'
+        """.strip())
+
+    def test_get_table_schema_sql_with_schema(self):
+        sql = get_table_schema_sql('"A"."B"')
+        self.assertEqual(sql.strip(), f"""
+SELECT column_name AS "name", data_type AS "originalType"
+FROM information_schema.columns
+WHERE table_name = 'B'
+ AND table_schema = 'A'
+        """.strip())
 
 
 if __name__ == '__main__':

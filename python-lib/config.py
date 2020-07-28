@@ -82,19 +82,56 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
     return f'{sf_stage_name}{path}/'
 
 
-def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr) -> AnyStr:
+def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
+    """
+    Generates SQL to extract table columns from DB
+    :param sf_table_name: Snowflake table in format of "schema"."table". Note that schema and table are case-sensitive.
+    :return: SQL for getting table columns
+    """
+    tab = sf_table_name.replace('"', '')
+    schema = tab.split('.')[0]
+    table = tab.split('.')[1]
+
+    sql = f'''
+SELECT column_name AS "name", data_type AS "originalType"
+FROM information_schema.columns
+WHERE table_name = '{table}'
+'''
+    if schema:
+        sql += f" AND table_schema = '{schema}'"
+
+    return sql
+
+
+def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
+                                sf_schema: List[Mapping[AnyStr, AnyStr]]) -> AnyStr:
     """
     Gets a COPY statement for copying from a Snowflake Table to an HDFS location
-    :param sf_location:
-    :param sf_table_name:
+    :param sf_location: HDFS location
+    :param sf_table_name: Snowflake table
+    :param sf_schema: Snowflake schema
     :return: a SQL COPY statement
     """
     # moving this function here isn't strictly necessary as it's not re-used, but it makes
     # things significantly easier to unit test.
 
+    # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP_NTZ
+    # Also cast TIMESTAMP because users can override TIMESTAMP to actually mean TIMESTAMP_TZ per
+    # documentation: https://docs.snowflake.com/en/sql-reference/parameters.html#client-timestamp-type-mapping
+    # This is required as the COPY command does not support TZ and LTZ
+    timezoned_types = ['TIMESTAMPLTZ', 'TIMESTAMPTZ', 'TIMESTAMP']
+    columns = [
+        f'"{c["name"]}"'
+        + (f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in timezoned_types else '')
+        for c in sf_schema
+    ]
+
     sql = f"""
 COPY INTO '{sf_location}'
-FROM {sf_table_name}
+FROM (
+    SELECT {', '.join(columns)}
+    FROM {sf_table_name}
+)
 FILE_FORMAT = (TYPE = PARQUET)
 OVERWRITE = TRUE
 HEADER = TRUE;
