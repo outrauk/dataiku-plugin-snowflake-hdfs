@@ -93,11 +93,11 @@ def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
     table = tab.split('.')[1]
 
     # Dataiku's `originalType` parameter is Snowflake's data_type but without `_`
-    sql = f'''
+    sql = f"""
 SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
 FROM information_schema.columns
 WHERE table_name = '{table}'
-    '''
+    """
 
     if schema:
         sql += f" AND table_schema = '{schema}'"
@@ -123,8 +123,7 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
     # This is required as the COPY command does not support TZ and LTZ
     timezoned_types = ['TIMESTAMPLTZ', 'TIMESTAMPTZ', 'TIMESTAMP']
     columns = [
-        f'"{c["name"]}"'
-        + (f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in timezoned_types else '')
+        f'"{c["name"]}"'(f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in timezoned_types else '')
         for c in sf_schema
     ]
 

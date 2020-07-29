@@ -75,11 +75,11 @@ class ConnectionNameTests(ConfigTests):
 
         with self.assertRaises(ValueError) as cm:
             _ = get_connection_name({
-                    'type': bad_type,
-                    'params': {
-                        'connection': 'BAZ'
-                    }
-                })
+                'type': bad_type,
+                'params': {
+                    'connection': 'BAZ'
+                }
+            })
 
         self._assert_invalid_type_exception(cm.exception, bad_type, 'Snowflake')
 
@@ -113,14 +113,14 @@ class TableNameTests(ConfigTests):
     def test_get_table_name_replaces_project_key(self):
         project_key = 'SOME_PROJECT'
         table_name = get_table_name({
-                'type': 'Snowflake',
-                'projectKey': project_key,
-                'params': {
-                    'mode': 'table',
-                    'table': 'Foo${projectKey}Bar',
-                    'schema': '${projectKey}blah'
-                }
-            })
+            'type': 'Snowflake',
+            'projectKey': project_key,
+            'params': {
+                'mode': 'table',
+                'table': 'Foo${projectKey}Bar',
+                'schema': '${projectKey}blah'
+            }
+        })
         self.assertNotRegex(table_name, re.escape('${projectKey}'))
         self.assertRegex(table_name, re.escape(project_key))
 
@@ -224,7 +224,7 @@ class HdfsLocationTests(ConfigTests):
             }
         }
         location = get_hdfs_location(config, 'some_stage')
-        self.assertRegex(location, f'/$')
+        self.assertRegex(location, '/$')
 
 
 class QueryCreationTests(ConfigTests):
@@ -291,9 +291,7 @@ HEADER = TRUE;
 
         self.assertRegex(sql, re.escape(expected_columns))
 
-
     def test_get_hdfs_to_snowflake_query_requires_a_column(self):
-
         with self.assertRaisesRegex(ValueError, 'must have at least one column'):
             _ = get_hdfs_to_snowflake_query('@some_location', '"SOME"."TABLE"', [])
 
@@ -349,7 +347,7 @@ class TableSchemaTests(ConfigTests):
 
     def test_get_table_schema_sql_no_schema(self):
         sql = get_table_schema_sql('""."B"')
-        self.assertEqual(sql.strip(), f"""
+        self.assertEqual(sql.strip(), """
 SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
 FROM information_schema.columns
 WHERE table_name = 'B'
@@ -357,7 +355,7 @@ WHERE table_name = 'B'
 
     def test_get_table_schema_sql_with_schema(self):
         sql = get_table_schema_sql('"A"."B"')
-        self.assertEqual(sql.strip(), f"""
+        self.assertEqual(sql.strip(), """
 SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
 FROM information_schema.columns
 WHERE table_name = 'B'
