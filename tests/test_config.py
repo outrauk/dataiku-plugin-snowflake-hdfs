@@ -346,10 +346,11 @@ FORCE = TRUE;
 
 
 class TableSchemaTests(ConfigTests):
+
     def test_get_table_schema_sql_no_schema(self):
         sql = get_table_schema_sql('""."B"')
         self.assertEqual(sql.strip(), f"""
-SELECT column_name AS "name", data_type AS "originalType"
+SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
 FROM information_schema.columns
 WHERE table_name = 'B'
         """.strip())
@@ -357,10 +358,10 @@ WHERE table_name = 'B'
     def test_get_table_schema_sql_with_schema(self):
         sql = get_table_schema_sql('"A"."B"')
         self.assertEqual(sql.strip(), f"""
-SELECT column_name AS "name", data_type AS "originalType"
+SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
 FROM information_schema.columns
 WHERE table_name = 'B'
- AND table_schema = 'A'
+     AND table_schema = 'A'
         """.strip())
 
 

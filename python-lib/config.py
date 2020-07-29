@@ -84,19 +84,21 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
 
 def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
     """
-    Generates SQL to extract table columns from DB
-    :param sf_table_name: Snowflake table in format of "schema"."table". Note that schema and table are case-sensitive.
+    Generates SQL to extract a table's schema
+    :param sf_table_name: Snowflake table in format of "schema"."table"
     :return: SQL for getting table columns
     """
     tab = sf_table_name.replace('"', '')
     schema = tab.split('.')[0]
     table = tab.split('.')[1]
 
+    # Dataiku's `originalType` parameter is Snowflake's data_type but without `_`
     sql = f'''
-SELECT column_name AS "name", data_type AS "originalType"
+SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
 FROM information_schema.columns
 WHERE table_name = '{table}'
-'''
+    '''
+
     if schema:
         sql += f" AND table_schema = '{schema}'"
 
