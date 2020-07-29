@@ -116,13 +116,10 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
     # things significantly easier to unit test.
 
     # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP_NTZ
-    # Also cast TIMESTAMP because users can override TIMESTAMP to actually mean TIMESTAMP_TZ per
-    # documentation: https://docs.snowflake.com/en/sql-reference/parameters.html#client-timestamp-type-mapping
     # This is required as the COPY command does not support TZ and LTZ
-    timezoned_types = ['TIMESTAMPLTZ', 'TIMESTAMPTZ', 'TIMESTAMP']
     columns = [
         f'"{c["name"]}"'
-        + (f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in timezoned_types else '')
+        + (f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in ['TIMESTAMP_LTZ', 'TIMESTAMP_TZ'] else '')
         for c in sf_schema
     ]
 
