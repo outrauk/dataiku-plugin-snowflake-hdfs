@@ -139,6 +139,19 @@ class TableNameTests(ConfigTests):
 
         self.assertEqual(table_name, f'"{input_schema}"."{input_table}"')
 
+    def test_get_table_name_quotes_and_concatenates_table(self):
+        input_table = 'My Table Name'
+        table_name = get_table_name({
+            'type': 'Snowflake',
+            'projectKey': 'SOME_PROJECT',
+            'params': {
+                'mode': 'table',
+                'table': input_table
+            }
+        })
+
+        self.assertEqual(table_name, f'"{input_table}"')
+
 
 class HdfsLocationTests(ConfigTests):
 
@@ -346,7 +359,7 @@ FORCE = TRUE;
 class TableSchemaTests(ConfigTests):
 
     def test_get_table_schema_sql_no_schema(self):
-        sql = get_table_schema_sql('""."B"')
+        sql = get_table_schema_sql('"B"')
         self.assertEqual(sql.strip(), """
 SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
 FROM information_schema.columns
@@ -358,8 +371,7 @@ WHERE table_name = 'B'
         self.assertEqual(sql.strip(), """
 SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
 FROM information_schema.columns
-WHERE table_name = 'B'
-     AND table_schema = 'A'
+WHERE table_name = 'B' AND table_schema = 'A'
         """.strip())
 
 

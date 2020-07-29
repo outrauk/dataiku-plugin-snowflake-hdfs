@@ -1,4 +1,5 @@
 from typing import AnyStr, Mapping, Any, List
+import re
 
 
 def get_stage_name(recipe_config: Mapping[AnyStr, AnyStr], plugin_config: Mapping[AnyStr, AnyStr]) -> AnyStr:
@@ -51,7 +52,12 @@ def get_table_name(dataset_config: Mapping[AnyStr, Any]) -> AnyStr:
         # e.g., mode == query
         raise ValueError(f'Snowflake connection mode {params["mode"]} is not currently supported.')
 
-    return f'"{params["schema"]}"."{params["table"]}"'.replace('${projectKey}', project_key)
+    table_name = f'"{params["table"]}"'
+
+    if 'schema' in params:
+        table_name = f'"{params["schema"]}".{table_name}'
+
+    return table_name.replace('${projectKey}', project_key)
 
 
 def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnyStr) -> AnyStr:
@@ -84,25 +90,21 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
 
 def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
     """
-    Generates SQL to extract a table's schema
-    :param sf_table_name: Snowflake table in format of "schema"."table"
+    Generates SQL to extract a table's column schema
+    :param sf_table_name: Snowflake table
     :return: SQL for getting table columns
     """
-    tab = sf_table_name.replace('"', '')
-    schema = tab.split('.')[0]
-    table = tab.split('.')[1]
+
+    tbl_sch_re = re.search(r'("?(?P<schema>[^"]+)"?\.)?"?(?P<table>[^"]+)"?', sf_table_name)
+
+    schema_clause = f'AND table_schema = \'{tbl_sch_re.group("schema")}\'' if tbl_sch_re.group('schema') else ''
 
     # Dataiku's `originalType` parameter is Snowflake's data_type but without `_`
-    sql = f"""
+    return f"""
 SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
 FROM information_schema.columns
-WHERE table_name = '{table}'
+WHERE table_name = '{tbl_sch_re.group("table")}' {schema_clause}
     """
-
-    if schema:
-        sql += f" AND table_schema = '{schema}'"
-
-    return sql
 
 
 def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
