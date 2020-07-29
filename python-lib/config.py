@@ -123,7 +123,7 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
     # This is required as the COPY command does not support TZ and LTZ
     timezoned_types = ['TIMESTAMPLTZ', 'TIMESTAMPTZ', 'TIMESTAMP']
     columns = [
-        f'"{c["name"]}"'(f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in timezoned_types else '')
+        f'"{c["name"]}"' + (f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in timezoned_types else '')
         for c in sf_schema
     ]
 
