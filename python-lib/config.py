@@ -54,7 +54,7 @@ def get_table_name(dataset_config: Mapping[AnyStr, Any]) -> AnyStr:
 
     table_name = f'"{params["table"]}"'
 
-    if 'schema' in params:
+    if params.get('schema', ''):
         table_name = f'"{params["schema"]}".{table_name}'
 
     return table_name.replace('${projectKey}', project_key)
