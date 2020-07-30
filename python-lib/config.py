@@ -95,6 +95,8 @@ def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
     :return: SQL for getting table columns
     """
 
+    # finds a quoted table name and, optionally, a schema prefix
+    # see tests for example inputs
     tbl_sch_re = re.search(r'("?(?P<schema>[^"]+)"?\.)?"?(?P<table>[^"]+)"?', sf_table_name)
 
     schema_clause = f'AND table_schema = \'{tbl_sch_re.group("schema")}\'' if tbl_sch_re.group('schema') else ''

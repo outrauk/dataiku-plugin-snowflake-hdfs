@@ -111,6 +111,9 @@ class TableNameTests(ConfigTests):
             })
 
     def test_get_table_name_replaces_project_key(self):
+        """
+        Tests table and schema names that include the `${projectKey}` replacement variable
+        """
         project_key = 'SOME_PROJECT'
         table_name = get_table_name({
             'type': 'Snowflake',
@@ -125,6 +128,9 @@ class TableNameTests(ConfigTests):
         self.assertRegex(table_name, re.escape(project_key))
 
     def test_get_table_name_quotes_and_concatenates_table_and_schema(self):
+        """
+        Tests table name and schema name
+        """
         input_table = 'My Table Name'
         input_schema = 'SCHEMAGIC'
         table_name = get_table_name({
@@ -139,7 +145,10 @@ class TableNameTests(ConfigTests):
 
         self.assertEqual(table_name, f'"{input_schema}"."{input_table}"')
 
-    def test_get_table_name_quotes_and_concatenates_table(self):
+    def test_get_table_name_quotes_table(self):
+        """
+        Tests table name without schema
+        """
         input_table = 'My Table Name'
         table_name = get_table_name({
             'type': 'Snowflake',
