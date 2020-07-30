@@ -282,16 +282,13 @@ HEADER = TRUE;
     def test_get_snowflake_to_hdfs_query_casts_columns(self):
         schema = [
             {
-                'name': 'col1', 'originalType': 'TIMESTAMPLTZ'
+                'name': 'col1', 'originalType': 'TIMESTAMP_LTZ'
             },
             {
-                'name': 'col2', 'originalType': 'TIMESTAMPTZ'
+                'name': 'col2', 'originalType': 'TIMESTAMP_TZ'
             },
             {
                 'name': 'col3', 'originalType': 'DATE'
-            },
-            {
-                'name': 'col4', 'originalType': 'TIMESTAMP'
             },
             {
                 'name': 'col5', 'originalType': 'VARCHAR'
@@ -307,9 +304,8 @@ HEADER = TRUE;
         expected_columns = f'"{schema[0]["name"]}"::TIMESTAMP_NTZ AS "{schema[0]["name"]}", ' \
                            f'"{schema[1]["name"]}"::TIMESTAMP_NTZ AS "{schema[1]["name"]}", ' \
                            f'"{schema[2]["name"]}", ' \
-                           f'"{schema[3]["name"]}"::TIMESTAMP_NTZ AS "{schema[3]["name"]}", ' \
-                           f'"{schema[4]["name"]}", ' \
-                           f'"{schema[5]["name"]}"'
+                           f'"{schema[3]["name"]}", ' \
+                           f'"{schema[4]["name"]}"'
 
         self.assertRegex(sql, re.escape(expected_columns))
 
