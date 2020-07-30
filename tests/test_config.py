@@ -256,13 +256,13 @@ class QueryCreationTests(ConfigTests):
         table = '"SCHEMAGIC"."TABLELATOR"'
         schema = [
             {
-                'name': 'col1', 'originalType': 'VARCHAR'
+                'name': 'col1', 'sfType': 'VARCHAR'
             },
             {
-                'name': 'col2', 'originalType': 'DATE'
+                'name': 'col2', 'sfType': 'DATE'
             },
             {
-                'name': 'col3', 'originalType': 'BOOLEAN'
+                'name': 'col3', 'sfType': 'BOOLEAN'
             }
         ]
 
@@ -282,20 +282,20 @@ HEADER = TRUE;
     def test_get_snowflake_to_hdfs_query_casts_columns(self):
         schema = [
             {
-                'name': 'col1', 'originalType': 'TIMESTAMP_LTZ'
+                'name': 'col1', 'sfType': 'TIMESTAMP_LTZ'
             },
             {
-                'name': 'col2', 'originalType': 'TIMESTAMP_TZ'
+                'name': 'col2', 'sfType': 'TIMESTAMP_TZ'
             },
             {
-                'name': 'col3', 'originalType': 'DATE'
+                'name': 'col3', 'sfType': 'DATE'
             },
             {
-                'name': 'col5', 'originalType': 'VARCHAR'
+                'name': 'col5', 'sfType': 'VARCHAR'
             },
             {
                 # Alias for TIMESTAMP_NTZ https://docs.snowflake.com/en/sql-reference/data-types-datetime.html#datetime
-                'name': 'col6', 'originalType': 'DATETIME'
+                'name': 'col6', 'sfType': 'DATETIME'
             }
         ]
 
@@ -366,7 +366,7 @@ class TableSchemaTests(ConfigTests):
     def test_get_table_schema_sql_no_schema(self):
         sql = get_table_schema_sql('"B"')
         self.assertEqual(sql.strip(), """
-SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
+SELECT column_name AS "name", data_type AS "sfType"
 FROM information_schema.columns
 WHERE table_name = 'B'
         """.strip())
@@ -374,7 +374,7 @@ WHERE table_name = 'B'
     def test_get_table_schema_sql_with_schema(self):
         sql = get_table_schema_sql('"A"."B"')
         self.assertEqual(sql.strip(), """
-SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
+SELECT column_name AS "name", data_type AS "sfType"
 FROM information_schema.columns
 WHERE table_name = 'B' AND table_schema = 'A'
         """.strip())

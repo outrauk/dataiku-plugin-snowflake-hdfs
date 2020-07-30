@@ -90,7 +90,7 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
 
 def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
     """
-    Generates SQL to extract a table's column schema
+    Generates SQL to extract a table's column schema (using `sfType` for the Snowflake data type)
     :param sf_table_name: Snowflake table
     :return: SQL for getting table columns
     """
@@ -103,7 +103,7 @@ def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
 
     # Dataiku's `originalType` parameter is Snowflake's data_type but without `_`
     return f"""
-SELECT column_name AS "name", REPLACE(data_type, '_', '') AS "originalType"
+SELECT column_name AS "name", data_type AS "sfType"
 FROM information_schema.columns
 WHERE table_name = '{tbl_sch_re.group("table")}' {schema_clause}
     """
@@ -115,7 +115,7 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
     Gets a COPY statement for copying from a Snowflake Table to an HDFS location
     :param sf_location: HDFS location
     :param sf_table_name: Snowflake table
-    :param sf_schema: Snowflake schema
+    :param sf_schema: Snowflake schema with a `sfType` property
     :return: a SQL COPY statement
     """
     # moving this function here isn't strictly necessary as it's not re-used, but it makes
@@ -124,8 +124,11 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
     # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP_NTZ
     # This is required as the COPY command does not support TZ and LTZ
     columns = [
-        f'"{c["name"]}"'
-        + (f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in ['TIMESTAMP_LTZ', 'TIMESTAMP_TZ'] else '')
+        f'"{c["name"]}"' + (
+            f'::TIMESTAMP_NTZ AS "{c["name"]}"'
+            if c['sfType'] in ['TIMESTAMP_LTZ', 'TIMESTAMP_TZ']
+            else ''
+        )
         for c in sf_schema
     ]
 
