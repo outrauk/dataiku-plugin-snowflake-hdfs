@@ -1,4 +1,5 @@
 from typing import AnyStr, Mapping, Any, List
+import re
 
 
 def get_stage_name(recipe_config: Mapping[AnyStr, AnyStr], plugin_config: Mapping[AnyStr, AnyStr]) -> AnyStr:
@@ -51,7 +52,12 @@ def get_table_name(dataset_config: Mapping[AnyStr, Any]) -> AnyStr:
         # e.g., mode == query
         raise ValueError(f'Snowflake connection mode {params["mode"]} is not currently supported.')
 
-    return f'"{params["schema"]}"."{params["table"]}"'.replace('${projectKey}', project_key)
+    table_name = f'"{params["table"]}"'
+
+    if params.get('schema', ''):
+        table_name = f'"{params["schema"]}".{table_name}'
+
+    return table_name.replace('${projectKey}', project_key)
 
 
 def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnyStr) -> AnyStr:
@@ -84,23 +90,23 @@ def get_hdfs_location(dataset_config: Mapping[AnyStr, Any], sf_stage_name: AnySt
 
 def get_table_schema_sql(sf_table_name: AnyStr) -> AnyStr:
     """
-    Generates SQL to extract table columns from DB
-    :param sf_table_name: Snowflake table in format of "schema"."table". Note that schema and table are case-sensitive.
+    Generates SQL to extract a table's column schema (using `sfType` for the Snowflake data type)
+    :param sf_table_name: Snowflake table
     :return: SQL for getting table columns
     """
-    tab = sf_table_name.replace('"', '')
-    schema = tab.split('.')[0]
-    table = tab.split('.')[1]
 
-    sql = f'''
-SELECT column_name AS "name", data_type AS "originalType"
+    # finds a quoted table name and, optionally, a schema prefix
+    # see tests for example inputs
+    tbl_sch_re = re.search(r'("?(?P<schema>[^"]+)"?\.)?"?(?P<table>[^"]+)"?', sf_table_name)
+
+    schema_clause = f'AND table_schema = \'{tbl_sch_re.group("schema")}\'' if tbl_sch_re.group('schema') else ''
+
+    # Dataiku's `originalType` parameter is Snowflake's data_type but without `_`
+    return f"""
+SELECT column_name AS "name", data_type AS "sfType"
 FROM information_schema.columns
-WHERE table_name = '{table}'
-'''
-    if schema:
-        sql += f" AND table_schema = '{schema}'"
-
-    return sql
+WHERE table_name = '{tbl_sch_re.group("table")}' {schema_clause}
+    """
 
 
 def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
@@ -109,20 +115,20 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
     Gets a COPY statement for copying from a Snowflake Table to an HDFS location
     :param sf_location: HDFS location
     :param sf_table_name: Snowflake table
-    :param sf_schema: Snowflake schema
+    :param sf_schema: Snowflake schema with a `sfType` property
     :return: a SQL COPY statement
     """
     # moving this function here isn't strictly necessary as it's not re-used, but it makes
     # things significantly easier to unit test.
 
     # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP_NTZ
-    # Also cast TIMESTAMP because users can override TIMESTAMP to actually mean TIMESTAMP_TZ per
-    # documentation: https://docs.snowflake.com/en/sql-reference/parameters.html#client-timestamp-type-mapping
     # This is required as the COPY command does not support TZ and LTZ
-    timezoned_types = ['TIMESTAMPLTZ', 'TIMESTAMPTZ', 'TIMESTAMP']
     columns = [
-        f'"{c["name"]}"'
-        + (f'::TIMESTAMP_NTZ AS "{c["name"]}"' if c['originalType'] in timezoned_types else '')
+        f'"{c["name"]}"' + (
+            f'::TIMESTAMP_NTZ AS "{c["name"]}"'
+            if c['sfType'] in ['TIMESTAMP_LTZ', 'TIMESTAMP_TZ']
+            else ''
+        )
         for c in sf_schema
     ]
 

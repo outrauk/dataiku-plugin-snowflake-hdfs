@@ -75,11 +75,11 @@ class ConnectionNameTests(ConfigTests):
 
         with self.assertRaises(ValueError) as cm:
             _ = get_connection_name({
-                    'type': bad_type,
-                    'params': {
-                        'connection': 'BAZ'
-                    }
-                })
+                'type': bad_type,
+                'params': {
+                    'connection': 'BAZ'
+                }
+            })
 
         self._assert_invalid_type_exception(cm.exception, bad_type, 'Snowflake')
 
@@ -111,20 +111,26 @@ class TableNameTests(ConfigTests):
             })
 
     def test_get_table_name_replaces_project_key(self):
+        """
+        Tests table and schema names that include the `${projectKey}` replacement variable
+        """
         project_key = 'SOME_PROJECT'
         table_name = get_table_name({
-                'type': 'Snowflake',
-                'projectKey': project_key,
-                'params': {
-                    'mode': 'table',
-                    'table': 'Foo${projectKey}Bar',
-                    'schema': '${projectKey}blah'
-                }
-            })
+            'type': 'Snowflake',
+            'projectKey': project_key,
+            'params': {
+                'mode': 'table',
+                'table': 'Foo${projectKey}Bar',
+                'schema': '${projectKey}blah'
+            }
+        })
         self.assertNotRegex(table_name, re.escape('${projectKey}'))
         self.assertRegex(table_name, re.escape(project_key))
 
     def test_get_table_name_quotes_and_concatenates_table_and_schema(self):
+        """
+        Tests table name and schema name
+        """
         input_table = 'My Table Name'
         input_schema = 'SCHEMAGIC'
         table_name = get_table_name({
@@ -138,6 +144,22 @@ class TableNameTests(ConfigTests):
         })
 
         self.assertEqual(table_name, f'"{input_schema}"."{input_table}"')
+
+    def test_get_table_name_quotes_table(self):
+        """
+        Tests table name without schema
+        """
+        input_table = 'My Table Name'
+        table_name = get_table_name({
+            'type': 'Snowflake',
+            'projectKey': 'SOME_PROJECT',
+            'params': {
+                'mode': 'table',
+                'table': input_table
+            }
+        })
+
+        self.assertEqual(table_name, f'"{input_table}"')
 
 
 class HdfsLocationTests(ConfigTests):
@@ -224,7 +246,7 @@ class HdfsLocationTests(ConfigTests):
             }
         }
         location = get_hdfs_location(config, 'some_stage')
-        self.assertRegex(location, f'/$')
+        self.assertRegex(location, '/$')
 
 
 class QueryCreationTests(ConfigTests):
@@ -234,13 +256,13 @@ class QueryCreationTests(ConfigTests):
         table = '"SCHEMAGIC"."TABLELATOR"'
         schema = [
             {
-                'name': 'col1', 'originalType': 'VARCHAR'
+                'name': 'col1', 'sfType': 'VARCHAR'
             },
             {
-                'name': 'col2', 'originalType': 'DATE'
+                'name': 'col2', 'sfType': 'DATE'
             },
             {
-                'name': 'col3', 'originalType': 'BOOLEAN'
+                'name': 'col3', 'sfType': 'BOOLEAN'
             }
         ]
 
@@ -260,23 +282,20 @@ HEADER = TRUE;
     def test_get_snowflake_to_hdfs_query_casts_columns(self):
         schema = [
             {
-                'name': 'col1', 'originalType': 'TIMESTAMPLTZ'
+                'name': 'col1', 'sfType': 'TIMESTAMP_LTZ'
             },
             {
-                'name': 'col2', 'originalType': 'TIMESTAMPTZ'
+                'name': 'col2', 'sfType': 'TIMESTAMP_TZ'
             },
             {
-                'name': 'col3', 'originalType': 'DATE'
+                'name': 'col3', 'sfType': 'DATE'
             },
             {
-                'name': 'col4', 'originalType': 'TIMESTAMP'
-            },
-            {
-                'name': 'col5', 'originalType': 'VARCHAR'
+                'name': 'col5', 'sfType': 'VARCHAR'
             },
             {
                 # Alias for TIMESTAMP_NTZ https://docs.snowflake.com/en/sql-reference/data-types-datetime.html#datetime
-                'name': 'col6', 'originalType': 'DATETIME'
+                'name': 'col6', 'sfType': 'DATETIME'
             }
         ]
 
@@ -285,15 +304,12 @@ HEADER = TRUE;
         expected_columns = f'"{schema[0]["name"]}"::TIMESTAMP_NTZ AS "{schema[0]["name"]}", ' \
                            f'"{schema[1]["name"]}"::TIMESTAMP_NTZ AS "{schema[1]["name"]}", ' \
                            f'"{schema[2]["name"]}", ' \
-                           f'"{schema[3]["name"]}"::TIMESTAMP_NTZ AS "{schema[3]["name"]}", ' \
-                           f'"{schema[4]["name"]}", ' \
-                           f'"{schema[5]["name"]}"'
+                           f'"{schema[3]["name"]}", ' \
+                           f'"{schema[4]["name"]}"'
 
         self.assertRegex(sql, re.escape(expected_columns))
 
-
     def test_get_hdfs_to_snowflake_query_requires_a_column(self):
-
         with self.assertRaisesRegex(ValueError, 'must have at least one column'):
             _ = get_hdfs_to_snowflake_query('@some_location', '"SOME"."TABLE"', [])
 
@@ -346,21 +362,21 @@ FORCE = TRUE;
 
 
 class TableSchemaTests(ConfigTests):
+
     def test_get_table_schema_sql_no_schema(self):
-        sql = get_table_schema_sql('""."B"')
-        self.assertEqual(sql.strip(), f"""
-SELECT column_name AS "name", data_type AS "originalType"
+        sql = get_table_schema_sql('"B"')
+        self.assertEqual(sql.strip(), """
+SELECT column_name AS "name", data_type AS "sfType"
 FROM information_schema.columns
 WHERE table_name = 'B'
         """.strip())
 
     def test_get_table_schema_sql_with_schema(self):
         sql = get_table_schema_sql('"A"."B"')
-        self.assertEqual(sql.strip(), f"""
-SELECT column_name AS "name", data_type AS "originalType"
+        self.assertEqual(sql.strip(), """
+SELECT column_name AS "name", data_type AS "sfType"
 FROM information_schema.columns
-WHERE table_name = 'B'
- AND table_schema = 'A'
+WHERE table_name = 'B' AND table_schema = 'A'
         """.strip())
 
 
