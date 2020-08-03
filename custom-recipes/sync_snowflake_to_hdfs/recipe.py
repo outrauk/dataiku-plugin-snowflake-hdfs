@@ -33,9 +33,9 @@ with hdfs_output.get_writer():
 executor = SQLExecutor2(connection=sf_connection_name)
 sql = get_table_schema_sql(sf_table_name)
 logger.info(f'Table schema query: {sql}')
-sh = executor.query_to_df(sql).to_dict('records')
-
-sql = get_snowflake_to_hdfs_query(sf_location, sf_table_name, sh)
+sf_native_schema = executor.query_to_df(sql).to_dict('records')
+sf_schema = combine_snowflake_schema_information(sf_input.read_schema(), sf_native_schema)
+sql = get_snowflake_to_hdfs_query(sf_location, sf_table_name, sf_schema)
 logger.info(f'SF Query: {sql}')
 results = executor.query_to_df(sql)
 
