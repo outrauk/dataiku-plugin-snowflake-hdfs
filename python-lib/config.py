@@ -109,6 +109,21 @@ WHERE table_name = '{tbl_sch_re.group("table")}' {schema_clause}
     """
 
 
+def combine_snowflake_schema_information(sf_schema_dss: List[Mapping[AnyStr, AnyStr]],
+                                         sf_schema_native: List[Mapping[AnyStr, AnyStr]]) \
+        -> List[Mapping[AnyStr, AnyStr]]:
+    """
+    Adds a `sfType` attribute to Dataiku's `read_schema` output
+    :param sf_schema_dss: the output of `read_schema`
+    :param sf_schema_native: the output of `get_table_schema_sql`
+    :return: `sf_schema_dss` with a `sfType` attribute
+    """
+    sf_native_types = {c['name']: c['sfType'] for c in sf_schema_native}
+    for col in sf_schema_dss:
+        col['sfType'] = sf_native_types[col['name']]
+    return sf_schema_dss
+
+
 def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
                                 sf_schema: List[Mapping[AnyStr, AnyStr]]) -> AnyStr:
     """
@@ -118,19 +133,23 @@ def get_snowflake_to_hdfs_query(sf_location: AnyStr, sf_table_name: AnyStr,
     :param sf_schema: Snowflake schema with a `sfType` property
     :return: a SQL COPY statement
     """
+
     # moving this function here isn't strictly necessary as it's not re-used, but it makes
     # things significantly easier to unit test.
 
-    # Generate SELECT clause and cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP_NTZ
-    # This is required as the COPY command does not support TZ and LTZ
-    columns = [
-        f'"{c["name"]}"' + (
-            f'::TIMESTAMP_NTZ AS "{c["name"]}"'
-            if c['sfType'] in ['TIMESTAMP_LTZ', 'TIMESTAMP_TZ']
-            else ''
-        )
-        for c in sf_schema
-    ]
+    def _get_column(c: Any) -> AnyStr:
+        type_cast = ''
+        if c['sfType'] in ['TIMESTAMP_LTZ', 'TIMESTAMP_TZ']:
+            # cast TIMESTAMP_TZ, TIMESTAMP_LTZ to TIMESTAMP_NTZ
+            # This is required as the COPY command does not support TZ and LTZ
+            type_cast = '::TIMESTAMP_NTZ'
+        if c['type'] in ['int', 'bigint']:
+            # cast int and bigint explicitly because SF stores this as `NUMBER`
+            # which DSS imports as Decimal
+            type_cast = f'::{c["type"]}'
+        return f'"{c["name"]}"{type_cast} AS "{c["name"]}"'
+
+    columns = list(map(_get_column, sf_schema))
 
     sql = f"""
 COPY INTO '{sf_location}'

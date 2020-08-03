@@ -256,13 +256,13 @@ class QueryCreationTests(ConfigTests):
         table = '"SCHEMAGIC"."TABLELATOR"'
         schema = [
             {
-                'name': 'col1', 'sfType': 'VARCHAR'
+                'name': 'col1', 'sfType': 'VARCHAR', 'type': 'string'
             },
             {
-                'name': 'col2', 'sfType': 'DATE'
+                'name': 'col2', 'sfType': 'DATE', 'type': 'date'
             },
             {
-                'name': 'col3', 'sfType': 'BOOLEAN'
+                'name': 'col3', 'sfType': 'BOOLEAN', 'type': 'bool'
             }
         ]
 
@@ -271,7 +271,7 @@ class QueryCreationTests(ConfigTests):
         self.assertEqual(sql.strip(), f"""
 COPY INTO '{location}'
 FROM (
-    SELECT "col1", "col2", "col3"
+    SELECT "col1" AS "col1", "col2" AS "col2", "col3" AS "col3"
     FROM {table}
 )
 FILE_FORMAT = (TYPE = PARQUET)
@@ -282,20 +282,29 @@ HEADER = TRUE;
     def test_get_snowflake_to_hdfs_query_casts_columns(self):
         schema = [
             {
-                'name': 'col1', 'sfType': 'TIMESTAMP_LTZ'
+                'name': 'col0', 'sfType': 'TIMESTAMP_LTZ', 'type': 'timestamp'
             },
             {
-                'name': 'col2', 'sfType': 'TIMESTAMP_TZ'
+                'name': 'col1', 'sfType': 'TIMESTAMP_TZ', 'type': 'timestamp'
             },
             {
-                'name': 'col3', 'sfType': 'DATE'
+                'name': 'col2', 'sfType': 'DATE', 'type': 'date'
             },
             {
-                'name': 'col5', 'sfType': 'VARCHAR'
+                'name': 'col3', 'sfType': 'VARCHAR', 'type': 'string'
             },
             {
                 # Alias for TIMESTAMP_NTZ https://docs.snowflake.com/en/sql-reference/data-types-datetime.html#datetime
-                'name': 'col6', 'sfType': 'DATETIME'
+                'name': 'col4', 'sfType': 'DATETIME', 'type': 'timestamp'
+            },
+            {
+                'name': 'col5', 'sfType': 'NUMBER', 'type': 'bigint'
+            },
+            {
+                'name': 'col6', 'sfType': 'NUMBER', 'type': 'int'
+            },
+            {
+                'name': 'col7', 'sfType': 'NUMBER', 'type': 'decimal'
             }
         ]
 
@@ -303,9 +312,12 @@ HEADER = TRUE;
 
         expected_columns = f'"{schema[0]["name"]}"::TIMESTAMP_NTZ AS "{schema[0]["name"]}", ' \
                            f'"{schema[1]["name"]}"::TIMESTAMP_NTZ AS "{schema[1]["name"]}", ' \
-                           f'"{schema[2]["name"]}", ' \
-                           f'"{schema[3]["name"]}", ' \
-                           f'"{schema[4]["name"]}"'
+                           f'"{schema[2]["name"]}" AS "{schema[2]["name"]}", ' \
+                           f'"{schema[3]["name"]}" AS "{schema[3]["name"]}", ' \
+                           f'"{schema[4]["name"]}" AS "{schema[4]["name"]}", ' \
+                           f'"{schema[5]["name"]}"::bigint AS "{schema[5]["name"]}", ' \
+                           f'"{schema[6]["name"]}"::int AS "{schema[6]["name"]}", ' \
+                           f'"{schema[7]["name"]}" AS "{schema[7]["name"]}"'
 
         self.assertRegex(sql, re.escape(expected_columns))
 
@@ -378,6 +390,48 @@ SELECT column_name AS "name", data_type AS "sfType"
 FROM information_schema.columns
 WHERE table_name = 'B' AND table_schema = 'A'
         """.strip())
+
+
+class CombineSnowflakeSchemaInformationTests(ConfigTests):
+
+    def test_combine_snowflake_schema_information_adds_sf_type(self):
+        dss_schema = [
+            {
+                'name': 'col1', 'type': 'string'
+            },
+            {
+                'name': 'col2', 'type': 'date'
+            },
+            {
+                'name': 'col3', 'type': 'bool'
+            }
+        ]
+        sf_schema = [
+            {
+                'name': 'col1', 'sfType': 'VARCHAR'
+            },
+            {
+                'name': 'col2', 'sfType': 'DATE'
+            },
+            {
+                'name': 'col3', 'sfType': 'BOOLEAN'
+            }
+        ]
+        schema = combine_snowflake_schema_information(dss_schema, sf_schema)
+
+        self.assertEqual([
+            {
+                'name': 'col1', 'sfType': 'VARCHAR', 'type': 'string'
+            },
+            {
+                'name': 'col2', 'sfType': 'DATE', 'type': 'date'
+            },
+            {
+                'name': 'col3', 'sfType': 'BOOLEAN', 'type': 'bool'
+            }
+        ], schema)
+
+        pass
 
 
 if __name__ == '__main__':
