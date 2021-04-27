@@ -17,6 +17,13 @@
             "label": "Default Snowflake Stage",
             "description": "This stage should point to the same folder as the managed HDFS connection",
             "mandatory": false
+        },
+        {
+            "name": "default_sf_storage_integration",
+            "type": "STRING",
+            "label": "Default Snowflake Storage Integration",
+            "description": "This storage integration should allow for access to the same folder as the managed S3 connection",
+            "mandatory": false
         }
     ]
 }
