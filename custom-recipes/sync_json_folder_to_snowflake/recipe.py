@@ -18,6 +18,7 @@ sf_storage_integration = get_storage_integration_name(get_recipe_config(), get_p
 sub_path = get_recipe_config().get('sub_path', None)
 folder_input_path = get_folder_location(folder_input_config, sub_path)
 
+# TODO: investigate allowing append rather than always drop and create
 # if true, we should check if the table exists
 # should_append = False
 
