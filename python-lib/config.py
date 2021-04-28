@@ -1,4 +1,4 @@
-from typing import AnyStr, Mapping, Any, List
+from typing import AnyStr, Mapping, Any, List, Optional
 import re
 
 
@@ -19,6 +19,22 @@ def get_stage_name(recipe_config: Mapping[AnyStr, AnyStr], plugin_config: Mappin
 
     return sf_stage_name if sf_stage_name.startswith('@') else f'@{sf_stage_name}'
 
+def get_storage_integration_name(recipe_config: Mapping[AnyStr, AnyStr], plugin_config: Mapping[AnyStr, AnyStr]) -> AnyStr:
+    """
+    Gets the best Snowflake STORAGE_INTEGRATION to use based on configuration settings. Does not check that the storage 
+    integration itself is valid or accessible.
+    :param recipe_config:
+    :param plugin_config:
+    :return: a Snowflake STORAGE_INTEGRATION
+    """
+    sf_storage_integration = recipe_config.get('sf_storage_integration', '')
+    if not sf_storage_integration:
+        sf_storage_integration = plugin_config.get('default_sf_storage_integration', '')
+
+    if not sf_storage_integration:
+        raise ValueError('Snowflake Storage Integration must be specified in the settings of the plugin or recipe.')
+
+    return sf_storage_integration
 
 def _assert_dataset_type(expected_type: AnyStr, actual_type: AnyStr) -> None:
     if expected_type != actual_type:
@@ -195,3 +211,30 @@ FORCE = TRUE;
     """
 
     return sql
+
+def get_folder_location(folder_config: Mapping[AnyStr, Any], sub_path: Optional[AnyStr] = None) -> AnyStr:
+    """
+    Get the S3 path to the JSON files' folder
+    :param folder_config: result of get_info on the input folder
+    :param sub_path: if the files are in a subdirectory of the input folder, specify it here
+    :return: an S3 location
+    """
+    _assert_dataset_type('S3', folder_config['type'])
+    access_info = folder_config['accessInfo']
+    s3_path = f's3://{access_info["bucket"]}{access_info["root"]}'
+    if sub_path:
+        s3_path += f'/{sub_path}'
+    return s3_path
+
+def get_create_table_query(table_name: AnyStr) -> AnyStr:
+    return f'''CREATE OR REPLACE TABLE {table_name} (
+        "src" VARIANT
+    );
+    '''
+
+def get_s3_to_snowflake_query(table_name: AnyStr, s3_location: AnyStr, sf_storage_integration: AnyStr) -> AnyStr:
+    return f'''copy into {table_name}
+from '{s3_location}'
+file_format = (type = json)
+storage_integration = {sf_storage_integration};
+    '''

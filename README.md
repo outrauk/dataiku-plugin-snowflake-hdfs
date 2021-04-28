@@ -1,11 +1,18 @@
-# Snowflake HDFS Tools
+# Snowflake Tools
 
-This is a [Dataiku plugin](https://doc.dataiku.com/dss/latest/plugins/index.html) that makes it easy to enable fast loads of [Parquet](https://en.wikipedia.org/wiki/Apache_Parquet) files between [Snowflake](https://www.snowflake.com) and HDFS.
+This is a [Dataiku plugin](https://doc.dataiku.com/dss/latest/plugins/index.html) that makes it easy to enable fast loads of files between [Snowflake](https://www.snowflake.com) and S3.
+
+Supported file formats include [JSON Lines](https://jsonlines.org/) and [Parquet](https://en.wikipedia.org/wiki/Apache_Parquet) (as an HDFS dataset).
 
 ## Prerequisites
 
 * An HDFS connection in Dataiku that points to an S3 bucket
 * A [Snowflake S3 `STAGE`](https://docs.snowflake.net/manuals/user-guide/data-load-s3-create-stage.html) that points to the same S3 bucket and path as DSS's managed HDFS connection
+
+For JSON:
+
+* A managed folder in Dataiku that points to an S3 bucket
+* A [Snowflake S3 `STORAGE_INTEGRATION`](https://docs.snowflake.com/en/user-guide/data-load-s3-config-storage-integration.html) that points to the same S3 bucket and path as DSS's managed S3 connection
 
 Your HDFS connection here:
 
@@ -61,6 +68,18 @@ When using the recipe, you can override the default stage in the _Snowflake Stag
 5. Click _Create_
 6. Set the _Snowflake Stage_ to the stage created above (note that if you've set a default stage in the plugin's settings, you can skip this step)
 7. Click _Run_
+
+### JSON &rarr; Snowflake
+
+1. In a Dataiku flow, click _+ Recipe_ and select _Snowflake Tools_
+2. From the popup, pick _Sync JSON to Snowflake_
+3. Select an S3-based managed folder that contains JSON Line files as the _Input_
+4. Select an existing or create a new Snowflake table as the _Output_
+5. Click _Create_
+6. Set the _Snowflake Storage Integration_ to the storage integration described above (note that if you've set a default storage integration in the plugin's settings, you can skip this step)
+7. Optionally, specify a subdirectory in the managed folder
+7. Click _Run_
+
 
 ## Building in PyCharm
 

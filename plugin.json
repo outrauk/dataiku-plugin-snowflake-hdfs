@@ -2,13 +2,13 @@
     "id" : "snowflake-hdfs",
     "version" : "0.0.6",
     "meta" : {
-        "label" : "Snowflake HDFS Tools",
-        "description" : "Facilitates fast loading between Snowflake <--> HDFS",
+        "label" : "Snowflake Tools",
+        "description" : "Facilitates fast loading between Snowflake <--> S3/HDFS",
         "author" : "Outra (Matt Klaber)",
         "icon" : "icon-exchange",
         "licenseInfo" : "MIT",
         "url" : "https://www.github.com/outrauk/dataiku-plugin-snowflake-hdfs",
-        "tags" : ["snowflake", "hdfs", "emrfs", "parquet", "sync"]
+        "tags" : ["snowflake", "hdfs", "emrfs", "parquet", "sync", "s3", "json"]
     },
     "params": [
         {
@@ -16,6 +16,13 @@
             "type": "STRING",
             "label": "Default Snowflake Stage",
             "description": "This stage should point to the same folder as the managed HDFS connection",
+            "mandatory": false
+        },
+        {
+            "name": "default_sf_storage_integration",
+            "type": "STRING",
+            "label": "Default Snowflake Storage Integration",
+            "description": "This storage integration should allow for access to the same folder as the managed S3 connection",
             "mandatory": false
         }
     ]

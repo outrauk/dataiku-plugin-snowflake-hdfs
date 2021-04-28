@@ -1,0 +1,55 @@
+{
+    "meta": {
+        "label": "Sync JSON to Snowflake",
+        "description": "Syncs a folder of JSON Line files to a table in Snowflake",
+        "icon": "icon-exchange"
+    },
+
+    "kind": "PYTHON",
+    "selectableFromDataset": "folder_input",
+
+    "inputRoles": [
+        {
+            "name": "folder_input",
+            "label": "JSON Folder",
+            "description": "Managed S3 folder containing JSON Line files",
+            "arity": "UNARY",
+            "required": true,
+            "acceptsManagedFolder": true,
+            "mustBeStrictlyType": "S3"
+        }
+    ],
+
+    "outputRoles": [
+        {
+            "name": "sf_output",
+            "label": "Snowflake Output",
+            "description": "Snowflake table",
+            "arity": "UNARY",
+            "required": true,
+            "acceptsDataset": true,
+            "mustBeSQL": true,
+            "mustBeStrictlyType": "Snowflake"
+        }
+    ],
+
+    "params": [
+        {
+            "name": "sub_path",
+            "label": "Subdirectory",
+            "type": "STRING",
+            "description": "If JSON files are in a subdirectory of the input folder, specify it here",
+            "mandatory": false
+        },
+        {
+            "name": "sf_storage_integration",
+            "label" : "Snowflake Storage Integration",
+            "type": "STRING",
+            "description":"The name of the storage integration that grants access to the same folder as the managed S3 connection. Uses plugin's default if not specified.",
+            "mandatory" : false
+        }
+    ],
+
+    "resourceKeys": []
+
+}
